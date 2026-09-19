@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>ThảQuà — Gọi video &amp; tặng quà</title>
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<style>
+  :root{
+    --bg:#0e0b12;
+    --bg-2:#161119;
+    --panel:#1c1520;
+    --panel-2:#231a29;
+    --line:rgba(255,255,255,.09);
+    --ink:#f4eef8;
+    --ink-dim:#b6a9c2;
+    --ink-faint:#7c6d89;
+    --momo:#d82d8b;
+    --momo-2:#ff5fae;
+    --gold:#f2b544;
+    --ok:#3fce88;
+    --danger:#ef5461;
+    --radius:18px;
+    font-size:16px;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(60% 50% at 15% 0%, rgba(216,45,139,.18), transparent 60%),
+      radial-gradient(50% 40% at 100% 10%, rgba(242,181,68,.10), transparent 60%),
+      var(--bg);
+    color:var(--ink);
+    font-family:'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+  }
+  ::selection{ background:var(--momo); color:#fff; }
+
+  /* ---------- top bar ---------- */
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 22px;
+    border-bottom:1px solid var(--line);
+    flex-shrink:0;
+  }
+  .brand{ display:flex; align-items:center; gap:10px; font-weight:700; letter-spacing:.2px; }
+  .brand-mark{
+    width:30px;height:30px;border-radius:9px;
+    background:linear-gradient(135deg,var(--momo),var(--gold));
+    display:flex;align-items:center;justify-content:center;font-size:16px;
+  }
+  .room-pill{
+    font-size:13px; color:var(--ink-dim);
+    background:var(--panel); border:1px solid var(--line);
+    padding:6px 12px; border-radius:999px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .room-pill b{ color:var(--ink); font-weight:600; letter-spacing:.5px; }
+  .room-pill button{
+    background:none;border:none;color:var(--momo-2);cursor:pointer;font-size:12px;font-weight:600;padding:0;
+  }
+
+  main{ flex:1; display:flex; min-height:0; }
+
+  /* ---------- setup screen ---------- */
+  .setup-wrap{
+    flex:1; display:flex; align-items:center; justify-content:center; padding:32px 18px;
+  }
+  .setup-card{
+    width:100%; max-width:460px;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:24px;
+    padding:30px 28px 26px;
+  }
+  .setup-card h1{
+    font-size:22px; margin:0 0 6px; font-weight:700;
+  }
+  .setup-card p.sub{ margin:0 0 24px; color:var(--ink-dim); font-size:14.5px; line-height:1.5; }
+  .tabs{ display:flex; background:var(--bg-2); border-radius:12px; padding:4px; margin-bottom:22px; }
+  .tabs button{
+    flex:1; border:none; background:none; color:var(--ink-dim);
+    padding:9px 0; border-radius:9px; font-size:14px; font-weight:600; cursor:pointer;
+  }
+  .tabs button.active{ background:var(--momo); color:#fff; }
+  label{ display:block; font-size:13px; color:var(--ink-dim); margin:14px 0 6px; }
+  input[type=text], input[type=tel]{
+    width:100%; background:var(--bg-2); border:1px solid var(--line); color:var(--ink);
+    padding:11px 13px; border-radius:11px; font-size:14.5px; outline:none;
+  }
+  input:focus{ border-color:var(--momo-2); }
+  .hint{ font-size:12px; color:var(--ink-faint); margin-top:6px; line-height:1.5; }
+  .gift-editor{ margin-top:6px; }
+  .gift-row{ display:flex; gap:8px; margin-bottom:8px; }
+  .gift-row input.icon{ width:52px; text-align:center; font-size:18px; }
+  .gift-row input.amt{ flex:1; }
+  .btn{
+    border:none; cursor:pointer; border-radius:12px; font-weight:700; font-size:14.5px;
+    padding:12px 18px; transition:transform .08s ease;
+  }
+  .btn:active{ transform:scale(.97); }
+  .btn-primary{ background:linear-gradient(135deg,var(--momo),var(--momo-2)); color:#fff; width:100%; margin-top:22px; }
+  .btn-ghost{ background:var(--bg-2); color:var(--ink); border:1px solid var(--line); }
+  .btn-small{ padding:8px 12px; font-size:13px; border-radius:9px; }
+  .err{ color:var(--danger); font-size:13px; margin-top:10px; min-height:16px; }
+
+  /* ---------- call screen ---------- */
+  .call-wrap{ flex:1; display:flex; min-height:0; width:100%; position:relative; }
+  .stage{
+    flex:1; position:relative; display:flex; align-items:center; justify-content:center;
+    background:#000; overflow:hidden;
+  }
+  video{ width:100%; height:100%; object-fit:cover; background:#050405; }
+  #remoteVideo{ position:absolute; inset:0; }
+  .self-pip{
+    position:absolute; right:16px; bottom:110px; width:150px; aspect-ratio:3/4;
+    border-radius:14px; overflow:hidden; border:2px solid rgba(255,255,255,.18);
+    box-shadow:0 8px 24px rgba(0,0,0,.5); z-index:5;
+  }
+  .self-pip video{ transform:scaleX(-1); }
+  .placeholder-avatar{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    flex-direction:column; gap:10px; color:var(--ink-faint); background:var(--bg-2);
+  }
+  .placeholder-avatar .circle{
+    width:74px;height:74px;border-radius:50%;
+    background:linear-gradient(135deg,var(--panel-2),var(--bg-2));
+    display:flex;align-items:center;justify-content:center;font-size:30px;
+    border:1px solid var(--line);
+  }
+  .status-chip{
+    position:absolute; top:16px; left:16px; z-index:6;
+    background:rgba(15,11,18,.66); backdrop-filter:blur(6px);
+    border:1px solid var(--line); padding:7px 13px; border-radius:999px;
+    font-size:12.5px; display:flex; align-items:center; gap:7px; color:var(--ink-dim);
+  }
+  .dot{ width:7px;height:7px;border-radius:50%; background:var(--ink-faint); }
+  .dot.live{ background:var(--ok); box-shadow:0 0 0 3px rgba(63,206,136,.2); }
+
+  .total-chip{
+    position:absolute; top:16px; right:16px; z-index:6;
+    background:linear-gradient(135deg,rgba(216,45,139,.35),rgba(242,181,68,.28));
+    border:1px solid rgba(255,255,255,.14);
+    padding:8px 14px; border-radius:999px; font-size:13px; font-weight:700;
+    display:flex; align-items:center; gap:7px;
+  }
+
+  /* flying gift layer */
+  .fly-layer{ position:absolute; inset:0; pointer-events:none; z-index:20; overflow:hidden; }
+  .fly-icon{
+    position:absolute; bottom:-10px; font-size:38px; filter:drop-shadow(0 4px 10px rgba(0,0,0,.4));
+    animation: floatUp 3.4s ease-in forwards;
+  }
+  @keyframes floatUp{
+    0%{ transform:translateY(0) translateX(0) rotate(0deg) scale(.6); opacity:0; }
+    8%{ opacity:1; transform:translateY(-6%) translateX(var(--drift1,10px)) rotate(-8deg) scale(1); }
+    50%{ transform:translateY(-52%) translateX(var(--drift2,-14px)) rotate(6deg) scale(1.05); }
+    100%{ transform:translateY(-108%) translateX(var(--drift3,6px)) rotate(-4deg) scale(.9); opacity:0; }
+  }
+  .toast-stack{
+    position:absolute; left:50%; top:64px; transform:translateX(-50%);
+    z-index:22; display:flex; flex-direction:column; gap:8px; align-items:center;
+    pointer-events:none; width:min(90%,360px);
+  }
+  .gift-toast{
+    background:rgba(20,14,22,.85); backdrop-filter:blur(8px);
+    border:1px solid rgba(255,255,255,.14);
+    padding:9px 16px; border-radius:999px; font-size:13.5px;
+    display:flex; align-items:center; gap:8px;
+    animation: toastIn .35s ease, toastOut .4s ease 2.6s forwards;
+    box-shadow:0 8px 20px rgba(0,0,0,.35);
+  }
+  @keyframes toastIn{ from{opacity:0; transform:translateY(-8px);} to{opacity:1; transform:translateY(0);} }
+  @keyframes toastOut{ to{opacity:0; transform:translateY(-6px);} }
+
+  /* controls */
+  .controls{
+    flex-shrink:0; padding:14px 18px 18px;
+    background:linear-gradient(180deg, transparent, rgba(0,0,0,.55) 40%);
+    position:absolute; left:0; right:0; bottom:0; z-index:15;
+  }
+  .gift-bar{
+    display:flex; gap:10px; overflow-x:auto; padding:4px 2px 14px; scrollbar-width:none;
+  }
+  .gift-bar::-webkit-scrollbar{ display:none; }
+  .gift-btn{
+    flex-shrink:0; width:74px; background:rgba(28,21,32,.78); backdrop-filter:blur(6px);
+    border:1px solid var(--line); border-radius:16px; padding:10px 6px 8px;
+    color:var(--ink); cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:4px;
+  }
+  .gift-btn .ic{ font-size:26px; }
+  .gift-btn .amt{ font-size:10.5px; color:var(--gold); font-weight:700; white-space:nowrap; }
+  .gift-btn:active{ transform:scale(.94); border-color:var(--momo-2); }
+
+  .action-row{ display:flex; align-items:center; justify-content:center; gap:14px; }
+  .round-btn{
+    width:52px; height:52px; border-radius:50%; border:1px solid var(--line);
+    background:rgba(28,21,32,.78); backdrop-filter:blur(6px); color:var(--ink);
+    font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center;
+  }
+  .round-btn.off{ background:rgba(239,84,97,.22); border-color:rgba(239,84,97,.5); }
+  .round-btn.end{ background:var(--danger); border-color:var(--danger); width:60px; }
+
+  /* ledger panel */
+  .ledger{
+    width:280px; flex-shrink:0; border-left:1px solid var(--line);
+    background:var(--panel); display:flex; flex-direction:column;
+  }
+  .ledger h2{ font-size:14px; margin:0; padding:16px 16px 10px; border-bottom:1px solid var(--line); }
+  .ledger-list{ flex:1; overflow-y:auto; padding:10px 14px; display:flex; flex-direction:column; gap:10px; }
+  .ledger-item{ display:flex; justify-content:space-between; align-items:center; font-size:13.5px; color:var(--ink-dim); }
+  .ledger-item b{ color:var(--ink); }
+  .ledger-empty{ color:var(--ink-faint); font-size:13px; padding:20px 4px; text-align:center; line-height:1.5; }
+  .ledger-total{ padding:14px 16px; border-top:1px solid var(--line); font-size:13px; color:var(--ink-dim); }
+  .ledger-total b{ color:var(--gold); font-size:17px; display:block; margin-top:2px; }
+  @media (max-width:840px){ .ledger{ display:none; } }
+
+  /* momo modal */
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(6,4,8,.72); backdrop-filter:blur(3px);
+    display:flex; align-items:flex-end; justify-content:center; z-index:60;
+  }
+  @media (min-width:640px){ .modal-overlay{ align-items:center; } }
+  .modal{
+    width:100%; max-width:420px; background:var(--panel);
+    border:1px solid var(--line); border-radius:22px 22px 0 0;
+    padding:24px 22px 26px; animation:modalUp .25s ease;
+  }
+  @media (min-width:640px){ .modal{ border-radius:22px; } }
+  @keyframes modalUp{ from{ transform:translateY(24px); opacity:0;} to{ transform:translateY(0); opacity:1;} }
+  .modal h3{ margin:0 0 4px; font-size:18px; display:flex; align-items:center; gap:8px; }
+  .modal p.sub{ margin:0 0 18px; color:var(--ink-dim); font-size:13.5px; line-height:1.5; }
+  .pay-amount{
+    text-align:center; font-size:30px; font-weight:800; color:var(--gold);
+    background:var(--bg-2); border:1px solid var(--line); border-radius:14px; padding:16px 0; margin-bottom:14px;
+  }
+  .pay-row{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    background:var(--bg-2); border:1px solid var(--line); border-radius:12px; padding:11px 14px; margin-bottom:10px;
+  }
+  .pay-row .l{ font-size:12px; color:var(--ink-faint); }
+  .pay-row .v{ font-size:14.5px; font-weight:700; letter-spacing:.4px; }
+  .pay-row button{ background:none; border:1px solid var(--line); color:var(--ink-dim); border-radius:8px; padding:5px 10px; font-size:12px; cursor:pointer; }
+  .steps{ margin:14px 0 0; padding-left:18px; color:var(--ink-dim); font-size:13px; line-height:1.9; }
+  .modal-actions{ display:flex; gap:10px; margin-top:18px; }
+  .modal-actions .btn{ flex:1; }
+  .note{
+    margin-top:14px; font-size:11.5px; color:var(--ink-faint); line-height:1.6;
+    background:rgba(242,181,68,.08); border:1px solid rgba(242,181,68,.22); border-radius:10px; padding:10px 12px;
+  }
+  .toast-simple{
+    position:fixed; bottom:22px; left:50%; transform:translateX(-50%);
+    background:var(--panel-2); border:1px solid var(--line); color:var(--ink);
+    padding:10px 18px; border-radius:999px; font-size:13px; z-index:80;
+    animation: toastIn .3s ease, toastOut .35s ease 1.8s forwards;
+  }
+  .copy-link-row{ display:flex; gap:8px; margin-top:10px; }
+  .copy-link-row input{ flex:1; }
+  .hidden{ display:none !important; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand"><div class="brand-mark">🎁</div> ThảQuà</div>
+  <div id="roomPillWrap" class="hidden">
+    <div class="room-pill">
+      Phòng: <b id="roomCodeLabel">—</b>
+      <button id="copyRoomBtn">Sao chép</button>
+    </div>
+  </div>
+</div>
+
+<main>
+
+  <!-- ============ SETUP SCREEN ============ -->
+  <section id="screen-setup" class="setup-wrap">
+    <div class="setup-card">
+      <h1>Gọi video &amp; thả quà tặng</h1>
+      <p class="sub">Kết nối video call 1-1 với một người bạn. Trong lúc gọi, hai bên có thể thả icon quà — mỗi icon tương ứng một mốc tiền, gửi qua MoMo.</p>
+
+      <div class="tabs">
+        <button id="tabCreate" class="active">Tạo phòng</button>
+        <button id="tabJoin">Vào phòng có sẵn</button>
+      </div>
+
+      <div id="paneCreate">
+        <label>Tên hiển thị của bạn</label>
+        <input type="text" id="nameCreate" placeholder="VD: Lan">
+
+        <label>Số điện thoại MoMo nhận quà</label>
+        <input type="tel" id="momoPhone" placeholder="09xx xxx xxx">
+        <div class="hint">Khi người xem thả quà, họ sẽ thấy số này để chuyển tiền qua MoMo cho bạn. Ứng dụng không tự động rút tiền — bạn luôn nhận tiền trực tiếp trong app MoMo.</div>
+
+        <label>Các mốc quà tặng</label>
+        <div class="gift-editor" id="giftEditor"></div>
+        <button class="btn btn-ghost btn-small" id="addGiftRow" type="button">+ Thêm mốc quà</button>
+
+        <button class="btn btn-primary" id="btnCreateRoom">Tạo phòng &amp; bắt đầu</button>
+      </div>
+
+      <div id="paneJoin" class="hidden">
+        <label>Tên hiển thị của bạn</label>
+        <input type="text" id="nameJoin" placeholder="VD: Minh">
+        <label>Mã phòng bạn được chia sẻ</label>
+        <input type="text" id="roomInput" placeholder="VD: qua-tang-8421">
+        <button class="btn btn-primary" id="btnJoinRoom">Vào phòng</button>
+      </div>
+
+      <div class="err" id="setupErr"></div>
+    </div>
+  </section>
+
+  <!-- ============ CALL SCREEN ============ -->
+  <section id="screen-call" class="call-wrap hidden">
+    <div class="stage">
+      <video id="remoteVideo" autoplay playsinline></video>
+      <div class="placeholder-avatar" id="remotePlaceholder">
+        <div class="circle">👤</div>
+        <div id="remoteStatusText">Đang chờ người kia tham gia…</div>
+      </div>
+
+      <div class="self-pip"><video id="localVideo" autoplay playsinline muted></video></div>
+
+      <div class="status-chip"><span class="dot" id="connDot"></span><span id="connText">Đang kết nối…</span></div>
+      <div class="total-chip">🎉 <span id="totalGiftText">0đ đã thả</span></div>
+
+      <div class="fly-layer" id="flyLayer"></div>
+      <div class="toast-stack" id="toastStack"></div>
+
+      <div class="controls">
+        <div class="gift-bar" id="giftBar"></div>
+        <div class="action-row">
+          <button class="round-btn" id="btnMic" title="Tắt/bật mic">🎙️</button>
+          <button class="round-btn" id="btnCam" title="Tắt/bật camera">📷</button>
+          <button class="round-btn end" id="btnEnd" title="Kết thúc">✕</button>
+        </div>
+      </div>
+    </div>
+
+    <aside class="ledger">
+      <h2>Lịch sử quà tặng phiên này</h2>
+      <div class="ledger-list" id="ledgerList">
+        <div class="ledger-empty">Chưa có quà nào được thả. Bấm icon bên dưới video để bắt đầu 🎁</div>
+      </div>
+      <div class="ledger-total">Tổng cộng<b id="ledgerTotal">0đ</b></div>
+    </aside>
+  </section>
+
+</main>
+
+<!-- Momo pay modal -->
+<div class="modal-overlay hidden" id="momoModal">
+  <div class="modal">
+    <h3 id="modalIcon">🎁 Chuyển quà qua MoMo</h3>
+    <p class="sub">Hoàn tất chuyển khoản trong app MoMo để món quà thực sự đến tay người nhận.</p>
+    <div class="pay-amount" id="modalAmount">0đ</div>
+    <div class="pay-row">
+      <div><div class="l">Số điện thoại MoMo người nhận</div><div class="v" id="modalPhone">—</div></div>
+      <button id="copyPhoneBtn">Sao chép</button>
+    </div>
+    <div class="pay-row">
+      <div><div class="l">Lời nhắn gợi ý</div><div class="v" id="modalMsg" style="font-weight:500;">—</div></div>
+      <button id="copyMsgBtn">Sao chép</button>
+    </div>
+    <ol class="steps">
+      <li>Mở app MoMo → chọn <b>Chuyển tiền</b></li>
+      <li>Dán số điện thoại vừa sao chép</li>
+      <li>Nhập đúng số tiền ở trên và gửi</li>
+    </ol>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="modalOpenMomo">Mở app MoMo</button>
+      <button class="btn btn-primary" id="modalDone">Đã chuyển xong</button>
+    </div>
+    <div class="note">Lưu ý: MoMo hiện chưa cấp API công khai để website tự động điền số tiền hoặc trừ tiền thay bạn. Bước chuyển khoản luôn cần bạn xác nhận thủ công trong app MoMo — đây là điều bắt buộc để đảm bảo an toàn tài khoản.</div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------------- state ---------------- */
+  const state = {
+    isHost:false,
+    myName:"",
+    momoPhone:"",
+    roomId:"",
+    gifts:[
+      {icon:"❤️", amount:10000},
+      {icon:"🌹", amount:20000},
+      {icon:"🎉", amount:50000},
+      {icon:"💎", amount:100000},
+      {icon:"👑", amount:500000},
+    ],
+    totalThrown:0,
+    log:[],
+    peer:null,
+    call:null,
+    dataConn:null,
+    localStream:null,
+    micOn:true,
+    camOn:true,
+  };
+
+  const $ = (id)=>document.getElementById(id);
+  const fmt = (n)=> n.toLocaleString('vi-VN') + "đ";
+
+  /* ---------------- gift editor (setup) ---------------- */
+  function renderGiftEditor(){
+    const wrap = $("giftEditor");
+    wrap.innerHTML = "";
+    state.gifts.forEach((g, i)=>{
+      const row = document.createElement("div");
+      row.className = "gift-row";
+      row.innerHTML = `
+        <input class="icon" value="${g.icon}" maxlength="4" data-idx="${i}" data-field="icon">
+        <input class="amt" type="text" inputmode="numeric" value="${g.amount}" data-idx="${i}" data-field="amount">
+        <button class="btn btn-ghost btn-small" data-remove="${i}" type="button">✕</button>
+      `;
+      wrap.appendChild(row);
+    });
+    wrap.querySelectorAll("input").forEach(inp=>{
+      inp.addEventListener("input", (e)=>{
+        const i = +e.target.dataset.idx, f = e.target.dataset.field;
+        if(f==="amount"){
+          const v = parseInt(e.target.value.replace(/[^\d]/g,""),10);
+          state.gifts[i].amount = isNaN(v)?0:v;
+        } else {
+          state.gifts[i].icon = e.target.value || "🎁";
+        }
+      });
+    });
+    wrap.querySelectorAll("[data-remove]").forEach(btn=>{
+      btn.addEventListener("click", (e)=>{
+        const i = +e.target.dataset.remove;
+        state.gifts.splice(i,1);
+        renderGiftEditor();
+      });
+    });
+  }
+  $("addGiftRow").addEventListener("click", ()=>{
+    state.gifts.push({icon:"🎁", amount:5000});
+    renderGiftEditor();
+  });
+  renderGiftEditor();
+
+  /* ---------------- tabs ---------------- */
+  $("tabCreate").addEventListener("click", ()=>{
+    $("tabCreate").classList.add("active"); $("tabJoin").classList.remove("active");
+    $("paneCreate").classList.remove("hidden"); $("paneJoin").classList.add("hidden");
+  });
+  $("tabJoin").addEventListener("click", ()=>{
+    $("tabJoin").classList.add("active"); $("tabCreate").classList.remove("active");
+    $("paneJoin").classList.remove("hidden"); $("paneCreate").classList.add("hidden");
+  });
+
+  function randomRoomId(){
+    const words = ["qua","vui","yeu","song","live","tim","sao","mua","xuan","ha"];
+    const w = words[Math.floor(Math.random()*words.length)];
+    return `${w}-${Math.floor(1000+Math.random()*9000)}`;
+  }
+
+  /* ---------------- create / join ---------------- */
+  $("btnCreateRoom").addEventListener("click", ()=>{
+    const name = $("nameCreate").value.trim();
+    const phone = $("momoPhone").value.trim();
+    $("setupErr").textContent = "";
+    if(!name){ $("setupErr").textContent = "Vui lòng nhập tên hiển thị."; return; }
+    if(!phone || phone.replace(/\D/g,"").length < 9){ $("setupErr").textContent = "Vui lòng nhập số điện thoại MoMo hợp lệ."; return; }
+    if(state.gifts.length === 0){ $("setupErr").textContent = "Thêm ít nhất một mốc quà tặng."; return; }
+    state.isHost = true;
+    state.myName = name;
+    state.momoPhone = phone;
+    state.roomId = randomRoomId();
+    startAsHost();
+  });
+
+  $("btnJoinRoom").addEventListener("click", ()=>{
+    const name = $("nameJoin").value.trim();
+    const room = $("roomInput").value.trim();
+    $("setupErr").textContent = "";
+    if(!name){ $("setupErr").textContent = "Vui lòng nhập tên hiển thị."; return; }
+    if(!room){ $("setupErr").textContent = "Vui lòng nhập mã phòng."; return; }
+    state.isHost = false;
+    state.myName = name;
+    state.roomId = room;
+    startAsGuest();
+  });
+
+  function goToCallScreen(){
+    $("screen-setup").classList.add("hidden");
+    $("screen-call").classList.remove("hidden");
+    $("roomPillWrap").classList.remove("hidden");
+    $("roomCodeLabel").textContent = state.roomId;
+    renderGiftBar();
+  }
+
+  $("copyRoomBtn").addEventListener("click", ()=>{
+    navigator.clipboard?.writeText(state.roomId);
+    showSimpleToast("Đã sao chép mã phòng");
+  });
+
+  /* ---------------- media + peer ---------------- */
+  async function getMedia(){
+    try{
+      const stream = await navigator.mediaDevices.getUserMedia({video:true, audio:true});
+      state.localStream = stream;
+      $("localVideo").srcObject = stream;
+      return stream;
+    }catch(err){
+      $("setupErr").textContent = "Không thể truy cập camera/mic: " + err.message;
+      throw err;
+    }
+  }
+
+  function setConn(text, live){
+    $("connText").textContent = text;
+    $("connDot").classList.toggle("live", !!live);
+  }
+
+  function setupDataHandlers(conn){
+    state.dataConn = conn;
+    conn.on("data", (data)=>{
+      if(data && data.type === "gift"){
+        receiveGift(data.icon, data.amount, data.from);
+      } else if(data && data.type === "hostinfo"){
+        state.momoPhone = data.momoPhone;
+        state.gifts = data.gifts;
+        renderGiftBar();
+      }
+    });
+    conn.on("close", ()=>{
+      setConn("Người kia đã rời phòng", false);
+      $("remotePlaceholder").classList.remove("hidden");
+      $("remoteStatusText").textContent = "Người kia đã rời phòng";
+    });
+  }
+
+  async function startAsHost(){
+    goToCallScreen();
+    setConn("Đang khởi tạo phòng…", false);
+    await getMedia();
+    const peer = new Peer(peerIdFor(state.roomId, "host"), {debug:0});
+    state.peer = peer;
+    peer.on("open", ()=>{ setConn("Đã sẵn sàng — chia sẻ mã phòng để mời", false); });
+    peer.on("error", (err)=>{ setConn("Lỗi kết nối: " + err.type, false); });
+
+    peer.on("connection", (conn)=>{
+      setupDataHandlers(conn);
+      conn.on("open", ()=>{
+        conn.send({type:"hostinfo", momoPhone: state.momoPhone, gifts: state.gifts});
+      });
+    });
+
+    peer.on("call", (incomingCall)=>{
+      incomingCall.answer(state.localStream);
+      wireCall(incomingCall);
+    });
+  }
+
+  async function startAsGuest(){
+    goToCallScreen();
+    setConn("Đang kết nối tới phòng…", false);
+    await getMedia();
+    const peer = new Peer(peerIdFor(state.roomId, "guest-" + Math.random().toString(36).slice(2,7)), {debug:0});
+    state.peer = peer;
+    peer.on("open", ()=>{
+      const hostId = peerIdFor(state.roomId, "host");
+      const conn = peer.connect(hostId, {reliable:true});
+      setupDataHandlers(conn);
+      conn.on("open", ()=>{ setConn("Đã kết nối — đang gọi video…", true); });
+
+      const outgoingCall = peer.call(hostId, state.localStream);
+      wireCall(outgoingCall);
+    });
+    peer.on("error", (err)=>{
+      setConn("Không tìm thấy phòng hoặc lỗi kết nối", false);
+      $("setupErr") && (null);
+    });
+  }
+
+  function peerIdFor(roomId, role){
+    // namespaced so random public broker collisions are unlikely
+    return "thaqua-" + roomId.replace(/[^a-z0-9-]/gi,"") + "-" + role;
+  }
+
+  function wireCall(call){
+    state.call = call;
+    call.on("stream", (remoteStream)=>{
+      $("remoteVideo").srcObject = remoteStream;
+      $("remotePlaceholder").classList.add("hidden");
+      setConn("Đang gọi video", true);
+    });
+    call.on("close", endCallCleanupRemoteOnly);
+    call.on("error", ()=> setConn("Lỗi cuộc gọi video", false));
+  }
+
+  function endCallCleanupRemoteOnly(){
+    $("remotePlaceholder").classList.remove("hidden");
+    $("remoteStatusText").textContent = "Cuộc gọi đã kết thúc";
+    setConn("Đã ngắt kết nối", false);
+  }
+
+  /* ---------------- gift bar + throwing ---------------- */
+  function renderGiftBar(){
+    const bar = $("giftBar");
+    bar.innerHTML = "";
+    state.gifts.forEach((g)=>{
+      const b = document.createElement("button");
+      b.className = "gift-btn";
+      b.innerHTML = `<span class="ic">${g.icon}</span><span class="amt">${fmt(g.amount)}</span>`;
+      b.addEventListener("click", ()=> throwGift(g));
+      bar.appendChild(b);
+    });
+  }
+
+  function throwGift(g){
+    spawnFlyIcon(g.icon);
+    addToLedger(state.myName + " (bạn)", g);
+    if(state.dataConn && state.dataConn.open){
+      state.dataConn.send({type:"gift", icon:g.icon, amount:g.amount, from: state.myName});
+    }
+    showGiftToast(`Bạn đã thả ${g.icon} ${fmt(g.amount)}`);
+    openMomoModal(g);
+  }
+
+  function receiveGift(icon, amount, from){
+    spawnFlyIcon(icon);
+    addToLedger(from, {icon, amount});
+    showGiftToast(`${from} vừa thả ${icon} ${fmt(amount)} cho bạn!`);
+  }
+
+  function spawnFlyIcon(icon){
+    const layer = $("flyLayer");
+    const el = document.createElement("div");
+    el.className = "fly-icon";
+    el.textContent = icon;
+    const leftPct = 15 + Math.random()*70;
+    el.style.left = leftPct + "%";
+    el.style.setProperty("--drift1", (Math.random()*30-15)+"px");
+    el.style.setProperty("--drift2", (Math.random()*40-20)+"px");
+    el.style.setProperty("--drift3", (Math.random()*30-15)+"px");
+    layer.appendChild(el);
+    setTimeout(()=> el.remove(), 3600);
+  }
+
+  function showGiftToast(text){
+    const stack = $("toastStack");
+    const el = document.createElement("div");
+    el.className = "gift-toast";
+    el.textContent = text;
+    stack.appendChild(el);
+    setTimeout(()=> el.remove(), 3100);
+  }
+  function showSimpleToast(text){
+    const el = document.createElement("div");
+    el.className = "toast-simple";
+    el.textContent = text;
+    document.body.appendChild(el);
+    setTimeout(()=> el.remove(), 2200);
+  }
+
+  function addToLedger(from, g){
+    state.totalThrown += g.amount;
+    state.log.unshift({from, icon:g.icon, amount:g.amount, t: new Date()});
+    renderLedger();
+  }
+
+  function renderLedger(){
+    $("totalGiftText").textContent = fmt(state.totalThrown) + " đã thả";
+    $("ledgerTotal").textContent = fmt(state.totalThrown);
+    const list = $("ledgerList");
+    if(state.log.length === 0){
+      list.innerHTML = `<div class="ledger-empty">Chưa có quà nào được thả. Bấm icon bên dưới video để bắt đầu 🎁</div>`;
+      return;
+    }
+    list.innerHTML = "";
+    state.log.slice(0,60).forEach(item=>{
+      const row = document.createElement("div");
+      row.className = "ledger-item";
+      const time = item.t.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'});
+      row.innerHTML = `<span>${item.icon} ${item.from} <span style="color:var(--ink-faint)">· ${time}</span></span><b>${fmt(item.amount)}</b>`;
+      list.appendChild(row);
+    });
+  }
+
+  /* ---------------- momo modal ---------------- */
+  let pendingGift = null;
+  function openMomoModal(g){
+    pendingGift = g;
+    $("modalIcon").textContent = g.icon + " Chuyển quà qua MoMo";
+    $("modalAmount").textContent = fmt(g.amount);
+    $("modalPhone").textContent = state.momoPhone || "Người nhận chưa cung cấp số";
+    $("modalMsg").textContent = `Tặng ${g.icon} trong buổi gọi`;
+    $("momoModal").classList.remove("hidden");
+  }
+  $("modalDone").addEventListener("click", ()=>{
+    $("momoModal").classList.add("hidden");
+    showSimpleToast("Cảm ơn bạn đã ủng hộ! 💖");
+  });
+  $("copyPhoneBtn").addEventListener("click", ()=>{
+    navigator.clipboard?.writeText(state.momoPhone || "");
+    showSimpleToast("Đã sao chép số điện thoại");
+  });
+  $("copyMsgBtn").addEventListener("click", ()=>{
+    navigator.clipboard?.writeText($("modalMsg").textContent);
+    showSimpleToast("Đã sao chép lời nhắn");
+  });
+  $("modalOpenMomo").addEventListener("click", ()=>{
+    // Best-effort: MoMo doesn't publish an official deep link for pre-filled
+    // personal transfers, so we try the app scheme and fall back gracefully.
+    const before = Date.now();
+    window.location.href = "momo://";
+    setTimeout(()=>{
+      if(Date.now() - before < 1600){
+        showSimpleToast("Nếu MoMo chưa mở, hãy mở app thủ công");
+      }
+    }, 1200);
+  });
+
+  /* ---------------- controls ---------------- */
+  $("btnMic").addEventListener("click", ()=>{
+    if(!state.localStream) return;
+    state.micOn = !state.micOn;
+    state.localStream.getAudioTracks().forEach(t=> t.enabled = state.micOn);
+    $("btnMic").classList.toggle("off", !state.micOn);
+    $("btnMic").textContent = state.micOn ? "🎙️" : "🔇";
+  });
+  $("btnCam").addEventListener("click", ()=>{
+    if(!state.localStream) return;
+    state.camOn = !state.camOn;
+    state.localStream.getVideoTracks().forEach(t=> t.enabled = state.camOn);
+    $("btnCam").classList.toggle("off", !state.camOn);
+    $("btnCam").textContent = state.camOn ? "📷" : "🚫";
+  });
+  $("btnEnd").addEventListener("click", ()=>{
+    if(confirm("Kết thúc cuộc gọi?")){
+      if(state.call) state.call.close();
+      if(state.dataConn) state.dataConn.close();
+      if(state.peer) state.peer.destroy();
+      if(state.localStream) state.localStream.getTracks().forEach(t=>t.stop());
+      location.reload();
+    }
+  });
+
+})();
+</script>
+</body>
+</html>
