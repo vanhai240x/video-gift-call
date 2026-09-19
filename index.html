@@ -7,20 +7,9 @@
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <style>
   :root{
-    --bg:#0e0b12;
-    --bg-2:#161119;
-    --panel:#1c1520;
-    --panel-2:#231a29;
-    --line:rgba(255,255,255,.09);
-    --ink:#f4eef8;
-    --ink-dim:#b6a9c2;
-    --ink-faint:#7c6d89;
-    --momo:#d82d8b;
-    --momo-2:#ff5fae;
-    --gold:#f2b544;
-    --ok:#3fce88;
-    --danger:#ef5461;
-    --radius:18px;
+    --bg:#0e0b12; --bg-2:#161119; --panel:#1c1520; --panel-2:#231a29;
+    --line:rgba(255,255,255,.09); --ink:#f4eef8; --ink-dim:#b6a9c2; --ink-faint:#7c6d89;
+    --momo:#d82d8b; --momo-2:#ff5fae; --gold:#f2b544; --ok:#3fce88; --danger:#ef5461;
     font-size:16px;
   }
   *{box-sizing:border-box;}
@@ -33,244 +22,129 @@
       var(--bg);
     color:var(--ink);
     font-family:'Segoe UI', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
-    min-height:100vh;
-    display:flex;
-    flex-direction:column;
+    min-height:100vh; display:flex; flex-direction:column;
   }
   ::selection{ background:var(--momo); color:#fff; }
 
-  /* ---------- top bar ---------- */
-  .topbar{
-    display:flex; align-items:center; justify-content:space-between;
-    padding:16px 22px;
-    border-bottom:1px solid var(--line);
-    flex-shrink:0;
-  }
-  .brand{ display:flex; align-items:center; gap:10px; font-weight:700; letter-spacing:.2px; }
-  .brand-mark{
-    width:30px;height:30px;border-radius:9px;
-    background:linear-gradient(135deg,var(--momo),var(--gold));
-    display:flex;align-items:center;justify-content:center;font-size:16px;
-  }
-  .room-pill{
-    font-size:13px; color:var(--ink-dim);
-    background:var(--panel); border:1px solid var(--line);
-    padding:6px 12px; border-radius:999px;
-    display:flex; align-items:center; gap:8px;
-  }
+  .topbar{ display:flex; align-items:center; justify-content:space-between; padding:16px 22px; border-bottom:1px solid var(--line); flex-shrink:0; }
+  .brand{ display:flex; align-items:center; gap:10px; font-weight:700; }
+  .brand-mark{ width:30px;height:30px;border-radius:9px; background:linear-gradient(135deg,var(--momo),var(--gold)); display:flex;align-items:center;justify-content:center;font-size:16px; }
+  .room-pill{ font-size:13px; color:var(--ink-dim); background:var(--panel); border:1px solid var(--line); padding:6px 12px; border-radius:999px; display:flex; align-items:center; gap:8px; }
   .room-pill b{ color:var(--ink); font-weight:600; letter-spacing:.5px; }
-  .room-pill button{
-    background:none;border:none;color:var(--momo-2);cursor:pointer;font-size:12px;font-weight:600;padding:0;
-  }
+  .room-pill button{ background:none;border:none;color:var(--momo-2);cursor:pointer;font-size:12px;font-weight:600;padding:0; }
+  .role-badge{ font-size:11.5px; font-weight:700; padding:4px 10px; border-radius:999px; background:var(--panel-2); border:1px solid var(--line); color:var(--ink-dim); }
+  .role-badge.idol{ color:var(--gold); border-color:rgba(242,181,68,.4); }
+  .role-badge.viewer{ color:var(--momo-2); border-color:rgba(216,45,139,.4); }
 
   main{ flex:1; display:flex; min-height:0; }
 
-  /* ---------- setup screen ---------- */
-  .setup-wrap{
-    flex:1; display:flex; align-items:center; justify-content:center; padding:32px 18px;
-  }
-  .setup-card{
-    width:100%; max-width:460px;
-    background:var(--panel);
-    border:1px solid var(--line);
-    border-radius:24px;
-    padding:30px 28px 26px;
-  }
-  .setup-card h1{
-    font-size:22px; margin:0 0 6px; font-weight:700;
-  }
+  .setup-wrap{ flex:1; display:flex; align-items:center; justify-content:center; padding:32px 18px; overflow-y:auto; }
+  .setup-card{ width:100%; max-width:460px; background:var(--panel); border:1px solid var(--line); border-radius:24px; padding:30px 28px 26px; }
+  .setup-card h1{ font-size:22px; margin:0 0 6px; font-weight:700; }
   .setup-card p.sub{ margin:0 0 24px; color:var(--ink-dim); font-size:14.5px; line-height:1.5; }
   .tabs{ display:flex; background:var(--bg-2); border-radius:12px; padding:4px; margin-bottom:22px; }
-  .tabs button{
-    flex:1; border:none; background:none; color:var(--ink-dim);
-    padding:9px 0; border-radius:9px; font-size:14px; font-weight:600; cursor:pointer;
-  }
+  .tabs button{ flex:1; border:none; background:none; color:var(--ink-dim); padding:9px 0; border-radius:9px; font-size:14px; font-weight:600; cursor:pointer; }
   .tabs button.active{ background:var(--momo); color:#fff; }
   label{ display:block; font-size:13px; color:var(--ink-dim); margin:14px 0 6px; }
-  input[type=text], input[type=tel]{
+  input[type=text], input[type=tel], input[type=password], select{
     width:100%; background:var(--bg-2); border:1px solid var(--line); color:var(--ink);
-    padding:11px 13px; border-radius:11px; font-size:14.5px; outline:none;
+    padding:11px 13px; border-radius:11px; font-size:14.5px; outline:none; font-family:inherit;
   }
-  input:focus{ border-color:var(--momo-2); }
+  input:focus, select:focus{ border-color:var(--momo-2); }
   .hint{ font-size:12px; color:var(--ink-faint); margin-top:6px; line-height:1.5; }
+  .role-choice{ display:flex; gap:10px; margin-top:4px; }
+  .role-opt{ flex:1; border:1px solid var(--line); background:var(--bg-2); border-radius:14px; padding:14px 12px; cursor:pointer; text-align:center; }
+  .role-opt.selected{ border-color:var(--momo-2); background:rgba(216,45,139,.12); }
+  .role-opt .ic{ font-size:24px; display:block; margin-bottom:6px; }
+  .role-opt .t{ font-weight:700; font-size:13.5px; }
+  .role-opt .d{ font-size:11.5px; color:var(--ink-faint); margin-top:3px; line-height:1.4; }
+  .idol-setup-block{ margin-top:8px; padding-top:6px; border-top:1px dashed var(--line); }
+  .idol-setup-block .section-title{ font-size:13px; font-weight:700; color:var(--gold); margin-top:18px; margin-bottom:2px; }
+  .two-col{ display:flex; gap:10px; }
+  .two-col > div{ flex:1; }
   .gift-editor{ margin-top:6px; }
   .gift-row{ display:flex; gap:8px; margin-bottom:8px; }
   .gift-row input.icon{ width:52px; text-align:center; font-size:18px; }
   .gift-row input.amt{ flex:1; }
-  .btn{
-    border:none; cursor:pointer; border-radius:12px; font-weight:700; font-size:14.5px;
-    padding:12px 18px; transition:transform .08s ease;
-  }
+  .btn{ border:none; cursor:pointer; border-radius:12px; font-weight:700; font-size:14.5px; padding:12px 18px; transition:transform .08s ease; }
   .btn:active{ transform:scale(.97); }
   .btn-primary{ background:linear-gradient(135deg,var(--momo),var(--momo-2)); color:#fff; width:100%; margin-top:22px; }
   .btn-ghost{ background:var(--bg-2); color:var(--ink); border:1px solid var(--line); }
   .btn-small{ padding:8px 12px; font-size:13px; border-radius:9px; }
   .err{ color:var(--danger); font-size:13px; margin-top:10px; min-height:16px; }
+  .hidden{ display:none !important; }
 
   /* ---------- call screen ---------- */
   .call-wrap{ flex:1; display:flex; min-height:0; width:100%; position:relative; }
-  .stage{
-    flex:1; position:relative; display:flex; align-items:center; justify-content:center;
-    background:#000; overflow:hidden;
-  }
+  .stage{ flex:1; position:relative; display:flex; align-items:center; justify-content:center; background:#000; overflow:hidden; }
   video{ width:100%; height:100%; object-fit:cover; background:#050405; }
   #remoteVideo{ position:absolute; inset:0; }
-  .self-pip{
-    position:absolute; right:16px; bottom:110px; width:150px; aspect-ratio:3/4;
-    border-radius:14px; overflow:hidden; border:2px solid rgba(255,255,255,.18);
-    box-shadow:0 8px 24px rgba(0,0,0,.5); z-index:5;
-  }
+  .self-pip{ position:absolute; right:16px; bottom:110px; width:150px; aspect-ratio:3/4; border-radius:14px; overflow:hidden; border:2px solid rgba(255,255,255,.18); box-shadow:0 8px 24px rgba(0,0,0,.5); z-index:5; }
   .self-pip video{ transform:scaleX(-1); }
-  .placeholder-avatar{
-    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-    flex-direction:column; gap:10px; color:var(--ink-faint); background:var(--bg-2);
-  }
-  .placeholder-avatar .circle{
-    width:74px;height:74px;border-radius:50%;
-    background:linear-gradient(135deg,var(--panel-2),var(--bg-2));
-    display:flex;align-items:center;justify-content:center;font-size:30px;
-    border:1px solid var(--line);
-  }
-  .status-chip{
-    position:absolute; top:16px; left:16px; z-index:6;
-    background:rgba(15,11,18,.66); backdrop-filter:blur(6px);
-    border:1px solid var(--line); padding:7px 13px; border-radius:999px;
-    font-size:12.5px; display:flex; align-items:center; gap:7px; color:var(--ink-dim);
-  }
+  .placeholder-avatar{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:10px; color:var(--ink-faint); background:var(--bg-2); text-align:center; padding:20px; }
+  .placeholder-avatar .circle{ width:74px;height:74px;border-radius:50%; background:linear-gradient(135deg,var(--panel-2),var(--bg-2)); display:flex;align-items:center;justify-content:center;font-size:30px; border:1px solid var(--line); }
+  .status-chip{ position:absolute; top:16px; left:16px; z-index:6; background:rgba(15,11,18,.66); backdrop-filter:blur(6px); border:1px solid var(--line); padding:7px 13px; border-radius:999px; font-size:12.5px; display:flex; align-items:center; gap:7px; color:var(--ink-dim); }
   .dot{ width:7px;height:7px;border-radius:50%; background:var(--ink-faint); }
   .dot.live{ background:var(--ok); box-shadow:0 0 0 3px rgba(63,206,136,.2); }
+  .total-chip{ position:absolute; top:16px; right:16px; z-index:6; background:linear-gradient(135deg,rgba(216,45,139,.35),rgba(242,181,68,.28)); border:1px solid rgba(255,255,255,.14); padding:8px 14px; border-radius:999px; font-size:13px; font-weight:700; display:flex; align-items:center; gap:7px; }
 
-  .total-chip{
-    position:absolute; top:16px; right:16px; z-index:6;
-    background:linear-gradient(135deg,rgba(216,45,139,.35),rgba(242,181,68,.28));
-    border:1px solid rgba(255,255,255,.14);
-    padding:8px 14px; border-radius:999px; font-size:13px; font-weight:700;
-    display:flex; align-items:center; gap:7px;
-  }
-
-  /* flying gift layer */
   .fly-layer{ position:absolute; inset:0; pointer-events:none; z-index:20; overflow:hidden; }
-  .fly-icon{
-    position:absolute; bottom:-10px; font-size:38px; filter:drop-shadow(0 4px 10px rgba(0,0,0,.4));
-    animation: floatUp 3.4s ease-in forwards;
-  }
+  .fly-icon{ position:absolute; bottom:-10px; font-size:38px; filter:drop-shadow(0 4px 10px rgba(0,0,0,.4)); animation: floatUp 3.4s ease-in forwards; }
   @keyframes floatUp{
     0%{ transform:translateY(0) translateX(0) rotate(0deg) scale(.6); opacity:0; }
     8%{ opacity:1; transform:translateY(-6%) translateX(var(--drift1,10px)) rotate(-8deg) scale(1); }
     50%{ transform:translateY(-52%) translateX(var(--drift2,-14px)) rotate(6deg) scale(1.05); }
     100%{ transform:translateY(-108%) translateX(var(--drift3,6px)) rotate(-4deg) scale(.9); opacity:0; }
   }
-  .toast-stack{
-    position:absolute; left:50%; top:64px; transform:translateX(-50%);
-    z-index:22; display:flex; flex-direction:column; gap:8px; align-items:center;
-    pointer-events:none; width:min(90%,360px);
-  }
-  .gift-toast{
-    background:rgba(20,14,22,.85); backdrop-filter:blur(8px);
-    border:1px solid rgba(255,255,255,.14);
-    padding:9px 16px; border-radius:999px; font-size:13.5px;
-    display:flex; align-items:center; gap:8px;
-    animation: toastIn .35s ease, toastOut .4s ease 2.6s forwards;
-    box-shadow:0 8px 20px rgba(0,0,0,.35);
-  }
+  .toast-stack{ position:absolute; left:50%; top:64px; transform:translateX(-50%); z-index:22; display:flex; flex-direction:column; gap:8px; align-items:center; pointer-events:none; width:min(90%,360px); }
+  .gift-toast{ background:rgba(20,14,22,.85); backdrop-filter:blur(8px); border:1px solid rgba(255,255,255,.14); padding:9px 16px; border-radius:999px; font-size:13.5px; display:flex; align-items:center; gap:8px; animation: toastIn .35s ease, toastOut .4s ease 2.6s forwards; box-shadow:0 8px 20px rgba(0,0,0,.35); }
   @keyframes toastIn{ from{opacity:0; transform:translateY(-8px);} to{opacity:1; transform:translateY(0);} }
   @keyframes toastOut{ to{opacity:0; transform:translateY(-6px);} }
 
-  /* controls */
-  .controls{
-    flex-shrink:0; padding:14px 18px 18px;
-    background:linear-gradient(180deg, transparent, rgba(0,0,0,.55) 40%);
-    position:absolute; left:0; right:0; bottom:0; z-index:15;
-  }
-  .gift-bar{
-    display:flex; gap:10px; overflow-x:auto; padding:4px 2px 14px; scrollbar-width:none;
-  }
+  .controls{ flex-shrink:0; padding:14px 18px 18px; background:linear-gradient(180deg, transparent, rgba(0,0,0,.55) 40%); position:absolute; left:0; right:0; bottom:0; z-index:15; }
+  .gift-bar{ display:flex; gap:10px; overflow-x:auto; padding:4px 2px 14px; scrollbar-width:none; }
   .gift-bar::-webkit-scrollbar{ display:none; }
-  .gift-btn{
-    flex-shrink:0; width:74px; background:rgba(28,21,32,.78); backdrop-filter:blur(6px);
-    border:1px solid var(--line); border-radius:16px; padding:10px 6px 8px;
-    color:var(--ink); cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:4px;
-  }
+  .gift-btn{ flex-shrink:0; width:74px; background:rgba(28,21,32,.78); backdrop-filter:blur(6px); border:1px solid var(--line); border-radius:16px; padding:10px 6px 8px; color:var(--ink); cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:4px; }
   .gift-btn .ic{ font-size:26px; }
   .gift-btn .amt{ font-size:10.5px; color:var(--gold); font-weight:700; white-space:nowrap; }
   .gift-btn:active{ transform:scale(.94); border-color:var(--momo-2); }
+  .waiting-strip{ text-align:center; color:var(--ink-faint); font-size:12.5px; padding:14px 0; }
 
   .action-row{ display:flex; align-items:center; justify-content:center; gap:14px; }
-  .round-btn{
-    width:52px; height:52px; border-radius:50%; border:1px solid var(--line);
-    background:rgba(28,21,32,.78); backdrop-filter:blur(6px); color:var(--ink);
-    font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center;
-  }
+  .round-btn{ width:52px; height:52px; border-radius:50%; border:1px solid var(--line); background:rgba(28,21,32,.78); backdrop-filter:blur(6px); color:var(--ink); font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
   .round-btn.off{ background:rgba(239,84,97,.22); border-color:rgba(239,84,97,.5); }
   .round-btn.end{ background:var(--danger); border-color:var(--danger); width:60px; }
 
-  /* ledger panel */
-  .ledger{
-    width:280px; flex-shrink:0; border-left:1px solid var(--line);
-    background:var(--panel); display:flex; flex-direction:column;
-  }
-  .ledger h2{ font-size:14px; margin:0; padding:16px 16px 10px; border-bottom:1px solid var(--line); }
+  /* side panel: ledger + QR */
+  .side{ width:300px; flex-shrink:0; border-left:1px solid var(--line); background:var(--panel); display:flex; flex-direction:column; overflow-y:auto; }
+  .side h2{ font-size:14px; margin:0; padding:16px 16px 10px; border-bottom:1px solid var(--line); }
+  .qr-block{ padding:16px; border-bottom:1px solid var(--line); }
+  .qr-amount{ text-align:center; font-size:24px; font-weight:800; color:var(--gold); margin-bottom:12px; }
+  .qr-img-wrap{ background:#fff; border-radius:14px; padding:12px; display:flex; align-items:center; justify-content:center; min-height:180px; }
+  .qr-img-wrap img{ width:100%; max-width:220px; display:block; border-radius:6px; }
+  .qr-empty{ color:#0e0b12; opacity:.55; font-size:12.5px; text-align:center; padding:20px 10px; }
+  .qr-meta{ margin-top:12px; font-size:12.5px; color:var(--ink-dim); line-height:1.7; }
+  .qr-meta b{ color:var(--ink); }
   .ledger-list{ flex:1; overflow-y:auto; padding:10px 14px; display:flex; flex-direction:column; gap:10px; }
   .ledger-item{ display:flex; justify-content:space-between; align-items:center; font-size:13.5px; color:var(--ink-dim); }
   .ledger-item b{ color:var(--ink); }
+  .ledger-item.divider{ justify-content:center; color:var(--ink-faint); font-size:11.5px; border-top:1px dashed var(--line); padding-top:10px; }
   .ledger-empty{ color:var(--ink-faint); font-size:13px; padding:20px 4px; text-align:center; line-height:1.5; }
   .ledger-total{ padding:14px 16px; border-top:1px solid var(--line); font-size:13px; color:var(--ink-dim); }
   .ledger-total b{ color:var(--gold); font-size:17px; display:block; margin-top:2px; }
-  @media (max-width:840px){ .ledger{ display:none; } }
+  .idol-confirm-btn{ margin:0 16px 16px; }
+  @media (max-width:900px){ .side{ display:none; } }
 
-  /* momo modal */
-  .modal-overlay{
-    position:fixed; inset:0; background:rgba(6,4,8,.72); backdrop-filter:blur(3px);
-    display:flex; align-items:flex-end; justify-content:center; z-index:60;
-  }
-  @media (min-width:640px){ .modal-overlay{ align-items:center; } }
-  .modal{
-    width:100%; max-width:420px; background:var(--panel);
-    border:1px solid var(--line); border-radius:22px 22px 0 0;
-    padding:24px 22px 26px; animation:modalUp .25s ease;
-  }
-  @media (min-width:640px){ .modal{ border-radius:22px; } }
-  @keyframes modalUp{ from{ transform:translateY(24px); opacity:0;} to{ transform:translateY(0); opacity:1;} }
-  .modal h3{ margin:0 0 4px; font-size:18px; display:flex; align-items:center; gap:8px; }
-  .modal p.sub{ margin:0 0 18px; color:var(--ink-dim); font-size:13.5px; line-height:1.5; }
-  .pay-amount{
-    text-align:center; font-size:30px; font-weight:800; color:var(--gold);
-    background:var(--bg-2); border:1px solid var(--line); border-radius:14px; padding:16px 0; margin-bottom:14px;
-  }
-  .pay-row{
-    display:flex; align-items:center; justify-content:space-between; gap:10px;
-    background:var(--bg-2); border:1px solid var(--line); border-radius:12px; padding:11px 14px; margin-bottom:10px;
-  }
-  .pay-row .l{ font-size:12px; color:var(--ink-faint); }
-  .pay-row .v{ font-size:14.5px; font-weight:700; letter-spacing:.4px; }
-  .pay-row button{ background:none; border:1px solid var(--line); color:var(--ink-dim); border-radius:8px; padding:5px 10px; font-size:12px; cursor:pointer; }
-  .steps{ margin:14px 0 0; padding-left:18px; color:var(--ink-dim); font-size:13px; line-height:1.9; }
-  .modal-actions{ display:flex; gap:10px; margin-top:18px; }
-  .modal-actions .btn{ flex:1; }
-  .note{
-    margin-top:14px; font-size:11.5px; color:var(--ink-faint); line-height:1.6;
-    background:rgba(242,181,68,.08); border:1px solid rgba(242,181,68,.22); border-radius:10px; padding:10px 12px;
-  }
-  .toast-simple{
-    position:fixed; bottom:22px; left:50%; transform:translateX(-50%);
-    background:var(--panel-2); border:1px solid var(--line); color:var(--ink);
-    padding:10px 18px; border-radius:999px; font-size:13px; z-index:80;
-    animation: toastIn .3s ease, toastOut .35s ease 1.8s forwards;
-  }
-  .copy-link-row{ display:flex; gap:8px; margin-top:10px; }
-  .copy-link-row input{ flex:1; }
-  .hidden{ display:none !important; }
+  .toast-simple{ position:fixed; bottom:22px; left:50%; transform:translateX(-50%); background:var(--panel-2); border:1px solid var(--line); color:var(--ink); padding:10px 18px; border-radius:999px; font-size:13px; z-index:80; animation: toastIn .3s ease, toastOut .35s ease 1.8s forwards; }
 </style>
 </head>
 <body>
 
 <div class="topbar">
   <div class="brand"><div class="brand-mark">🎁</div> ThảQuà</div>
-  <div id="roomPillWrap" class="hidden">
-    <div class="room-pill">
-      Phòng: <b id="roomCodeLabel">—</b>
-      <button id="copyRoomBtn">Sao chép</button>
-    </div>
+  <div id="roomPillWrap" class="hidden" style="display:flex; gap:10px; align-items:center;">
+    <span class="role-badge" id="myRoleBadge"></span>
+    <div class="room-pill">Phòng: <b id="roomCodeLabel">—</b><button id="copyRoomBtn">Sao chép</button></div>
   </div>
 </div>
 
@@ -280,37 +154,62 @@
   <section id="screen-setup" class="setup-wrap">
     <div class="setup-card">
       <h1>Gọi video &amp; thả quà tặng</h1>
-      <p class="sub">Kết nối video call 1-1 với một người bạn. Trong lúc gọi, hai bên có thể thả icon quà — mỗi icon tương ứng một mốc tiền, gửi qua MoMo.</p>
+      <p class="sub">Phòng riêng tư chỉ dành cho 2 người, có mật khẩu. Người xem thả quà trong lúc gọi, Idol nhận tổng tiền qua QR MoMo.</p>
 
       <div class="tabs">
         <button id="tabCreate" class="active">Tạo phòng</button>
         <button id="tabJoin">Vào phòng có sẵn</button>
       </div>
 
+      <!-- CREATE PANE -->
       <div id="paneCreate">
         <label>Tên hiển thị của bạn</label>
         <input type="text" id="nameCreate" placeholder="VD: Lan">
 
-        <label>Số điện thoại MoMo nhận quà</label>
-        <input type="tel" id="momoPhone" placeholder="09xx xxx xxx">
-        <div class="hint">Khi người xem thả quà, họ sẽ thấy số này để chuyển tiền qua MoMo cho bạn. Ứng dụng không tự động rút tiền — bạn luôn nhận tiền trực tiếp trong app MoMo.</div>
+        <label>Đặt mật khẩu phòng</label>
+        <input type="password" id="passCreate" placeholder="Tối thiểu 4 ký tự">
+        <div class="hint">Chỉ người biết mã phòng lẫn mật khẩu mới vào được. Phòng chỉ nhận đúng 1 người còn lại.</div>
 
-        <label>Các mốc quà tặng</label>
-        <div class="gift-editor" id="giftEditor"></div>
-        <button class="btn btn-ghost btn-small" id="addGiftRow" type="button">+ Thêm mốc quà</button>
+        <label>Vai trò của bạn trong phòng</label>
+        <div class="role-choice">
+          <div class="role-opt selected" id="roleOptViewer" data-role="viewer">
+            <span class="ic">🙋</span><span class="t">Người xem</span>
+            <div class="d">Được thả quà cho Idol</div>
+          </div>
+          <div class="role-opt" id="roleOptIdol" data-role="idol">
+            <span class="ic">🎤</span><span class="t">Idol livestream</span>
+            <div class="d">Nhận quà, không thả quà</div>
+          </div>
+        </div>
+
+        <div id="idolSetupCreate" class="idol-setup-block hidden"></div>
 
         <button class="btn btn-primary" id="btnCreateRoom">Tạo phòng &amp; bắt đầu</button>
       </div>
 
+      <!-- JOIN PANE -->
       <div id="paneJoin" class="hidden">
         <label>Tên hiển thị của bạn</label>
         <input type="text" id="nameJoin" placeholder="VD: Minh">
         <label>Mã phòng bạn được chia sẻ</label>
         <input type="text" id="roomInput" placeholder="VD: qua-tang-8421">
+        <label>Mật khẩu phòng</label>
+        <input type="password" id="passJoin" placeholder="Mật khẩu do chủ phòng đặt">
         <button class="btn btn-primary" id="btnJoinRoom">Vào phòng</button>
       </div>
 
       <div class="err" id="setupErr"></div>
+    </div>
+  </section>
+
+  <!-- ============ IDOL POST-JOIN SETUP (when joiner turns out to be idol) ============ -->
+  <section id="screen-idol-postjoin" class="setup-wrap hidden">
+    <div class="setup-card">
+      <h1>Thiết lập nhận quà</h1>
+      <p class="sub">Bạn là <b>Idol</b> trong phòng này. Điền thông tin nhận tiền và các mốc quà để người xem có thể thả quà cho bạn.</p>
+      <div id="idolSetupJoin" class="idol-setup-block"></div>
+      <button class="btn btn-primary" id="btnFinishIdolSetup">Hoàn tất &amp; vào cuộc gọi</button>
+      <div class="err" id="idolSetupErr"></div>
     </div>
   </section>
 
@@ -332,7 +231,8 @@
       <div class="toast-stack" id="toastStack"></div>
 
       <div class="controls">
-        <div class="gift-bar" id="giftBar"></div>
+        <div class="gift-bar hidden" id="giftBar"></div>
+        <div class="waiting-strip hidden" id="waitingForGifts">Đang chờ Idol thiết lập mốc quà tặng…</div>
         <div class="action-row">
           <button class="round-btn" id="btnMic" title="Tắt/bật mic">🎙️</button>
           <button class="round-btn" id="btnCam" title="Tắt/bật camera">📷</button>
@@ -341,114 +241,137 @@
       </div>
     </div>
 
-    <aside class="ledger">
+    <aside class="side">
+      <div class="qr-block hidden" id="qrBlock">
+        <h2 style="padding:0 0 12px; border:none;">Quét mã MoMo để chuyển</h2>
+        <div class="qr-amount" id="qrAmount">0đ</div>
+        <div class="qr-img-wrap" id="qrImgWrap"><div class="qr-empty">Chưa có quà nào cần thanh toán</div></div>
+        <div class="qr-meta" id="qrMeta"></div>
+      </div>
       <h2>Lịch sử quà tặng phiên này</h2>
       <div class="ledger-list" id="ledgerList">
-        <div class="ledger-empty">Chưa có quà nào được thả. Bấm icon bên dưới video để bắt đầu 🎁</div>
+        <div class="ledger-empty">Chưa có quà nào được thả.</div>
       </div>
-      <div class="ledger-total">Tổng cộng<b id="ledgerTotal">0đ</b></div>
+      <div class="ledger-total">Tổng chưa thanh toán<b id="ledgerTotal">0đ</b></div>
+      <button class="btn btn-ghost btn-small idol-confirm-btn hidden" id="btnConfirmReceived">✔ Idol xác nhận đã nhận đủ, reset</button>
     </aside>
   </section>
 
 </main>
 
-<!-- Momo pay modal -->
-<div class="modal-overlay hidden" id="momoModal">
-  <div class="modal">
-    <h3 id="modalIcon">🎁 Chuyển quà qua MoMo</h3>
-    <p class="sub">Hoàn tất chuyển khoản trong app MoMo để món quà thực sự đến tay người nhận.</p>
-    <div class="pay-amount" id="modalAmount">0đ</div>
-    <div class="pay-row">
-      <div><div class="l">Số điện thoại MoMo người nhận</div><div class="v" id="modalPhone">—</div></div>
-      <button id="copyPhoneBtn">Sao chép</button>
-    </div>
-    <div class="pay-row">
-      <div><div class="l">Lời nhắn gợi ý</div><div class="v" id="modalMsg" style="font-weight:500;">—</div></div>
-      <button id="copyMsgBtn">Sao chép</button>
-    </div>
-    <ol class="steps">
-      <li>Mở app MoMo → chọn <b>Chuyển tiền</b></li>
-      <li>Dán số điện thoại vừa sao chép</li>
-      <li>Nhập đúng số tiền ở trên và gửi</li>
-    </ol>
-    <div class="modal-actions">
-      <button class="btn btn-ghost" id="modalOpenMomo">Mở app MoMo</button>
-      <button class="btn btn-primary" id="modalDone">Đã chuyển xong</button>
-    </div>
-    <div class="note">Lưu ý: MoMo hiện chưa cấp API công khai để website tự động điền số tiền hoặc trừ tiền thay bạn. Bước chuyển khoản luôn cần bạn xác nhận thủ công trong app MoMo — đây là điều bắt buộc để đảm bảo an toàn tài khoản.</div>
-  </div>
-</div>
-
 <script>
 (function(){
   "use strict";
 
-  /* ---------------- state ---------------- */
   const state = {
-    isHost:false,
-    myName:"",
-    momoPhone:"",
-    roomId:"",
-    gifts:[
-      {icon:"❤️", amount:10000},
-      {icon:"🌹", amount:20000},
-      {icon:"🎉", amount:50000},
-      {icon:"💎", amount:100000},
-      {icon:"👑", amount:500000},
-    ],
-    totalThrown:0,
-    log:[],
-    peer:null,
-    call:null,
-    dataConn:null,
-    localStream:null,
-    micOn:true,
-    camOn:true,
+    myRole:null, peerRole:null, isRoomCreator:false,
+    myName:"", password:"", roomId:"",
+    payInfo:null, gifts:[],
+    unpaidTotal:0, log:[],
+    peer:null, call:null, dataConn:null, localStream:null,
+    micOn:true, camOn:true,
+    acceptedGuestId:null,
   };
 
   const $ = (id)=>document.getElementById(id);
-  const fmt = (n)=> n.toLocaleString('vi-VN') + "đ";
+  const fmt = (n)=> (n||0).toLocaleString('vi-VN') + "đ";
 
-  /* ---------------- gift editor (setup) ---------------- */
-  function renderGiftEditor(){
-    const wrap = $("giftEditor");
+  const BANKS = [
+    ["vietcombank","Vietcombank"],["techcombank","Techcombank"],["mbbank","MB Bank"],
+    ["acb","ACB"],["bidv","BIDV"],["vietinbank","VietinBank"],["agribank","Agribank"],
+    ["vpbank","VPBank"],["tpbank","TPBank"],["sacombank","Sacombank"],["hdbank","HDBank"],
+    ["shb","SHB"],["vib","VIB"],["msb","MSB"],["ocb","OCB"],["seabank","SeABank"],
+    ["bvbank","BVBank (Bản Việt)"],["eximbank","Eximbank"],["scb","SCB"],["namabank","Nam Á Bank"],
+    ["other","Khác — tự nhập mã ngân hàng"]
+  ];
+
+  function stripVN(str){
+    return (str||"")
+      .normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+      .replace(/đ/g,"d").replace(/Đ/g,"D")
+      .replace(/[^a-zA-Z0-9\s]/g,"")
+      .trim();
+  }
+
+  function idolSetupHTML(prefix){
+    return `
+      <div class="section-title">Thông tin nhận tiền</div>
+      <label>Ngân hàng nhận tiền</label>
+      <select id="${prefix}Bank"></select>
+      <div id="${prefix}BankOtherWrap" class="hidden">
+        <label>Mã ngân hàng (tra tại vietqr.io)</label>
+        <input type="text" id="${prefix}BankOther" placeholder="VD: vietcombank hoặc 970436">
+      </div>
+      <div class="two-col">
+        <div><label>Số tài khoản</label><input type="text" id="${prefix}AccNo" placeholder="0123456789" inputmode="numeric"></div>
+        <div><label>Chủ tài khoản</label><input type="text" id="${prefix}AccName" placeholder="NGUYEN VAN A"></div>
+      </div>
+      <div class="hint">Đây có thể là tài khoản ngân hàng liên kết với MoMo của bạn. Người xem sẽ quét mã QR bằng app MoMo (hoặc app ngân hàng bất kỳ) để chuyển đúng số tiền đang hiển thị.</div>
+
+      <div class="section-title">Các mốc quà tặng</div>
+      <div class="gift-editor" id="${prefix}GiftEditor"></div>
+      <button class="btn btn-ghost btn-small" id="${prefix}AddGift" type="button">+ Thêm mốc quà</button>
+    `;
+  }
+
+  function defaultGifts(){
+    return [
+      {icon:"❤️", amount:10000},{icon:"🌹", amount:20000},
+      {icon:"🎉", amount:50000},{icon:"💎", amount:100000},{icon:"👑", amount:500000},
+    ];
+  }
+
+  function wireIdolSetupBlock(prefix, giftsRef){
+    const bankSel = $(prefix+"Bank");
+    bankSel.innerHTML = BANKS.map(b=>`<option value="${b[0]}">${b[1]}</option>`).join("");
+    bankSel.addEventListener("change", ()=>{
+      $(prefix+"BankOtherWrap").classList.toggle("hidden", bankSel.value !== "other");
+    });
+    renderGiftEditorInto(prefix+"GiftEditor", giftsRef);
+    $(prefix+"AddGift").addEventListener("click", ()=>{
+      giftsRef.push({icon:"🎁", amount:5000});
+      renderGiftEditorInto(prefix+"GiftEditor", giftsRef);
+    });
+  }
+
+  function renderGiftEditorInto(elId, giftsRef){
+    const wrap = $(elId);
     wrap.innerHTML = "";
-    state.gifts.forEach((g, i)=>{
+    giftsRef.forEach((g,i)=>{
       const row = document.createElement("div");
       row.className = "gift-row";
       row.innerHTML = `
         <input class="icon" value="${g.icon}" maxlength="4" data-idx="${i}" data-field="icon">
         <input class="amt" type="text" inputmode="numeric" value="${g.amount}" data-idx="${i}" data-field="amount">
-        <button class="btn btn-ghost btn-small" data-remove="${i}" type="button">✕</button>
-      `;
+        <button class="btn btn-ghost btn-small" data-remove="${i}" type="button">✕</button>`;
       wrap.appendChild(row);
     });
     wrap.querySelectorAll("input").forEach(inp=>{
-      inp.addEventListener("input", (e)=>{
-        const i = +e.target.dataset.idx, f = e.target.dataset.field;
-        if(f==="amount"){
-          const v = parseInt(e.target.value.replace(/[^\d]/g,""),10);
-          state.gifts[i].amount = isNaN(v)?0:v;
-        } else {
-          state.gifts[i].icon = e.target.value || "🎁";
-        }
+      inp.addEventListener("input",(e)=>{
+        const i=+e.target.dataset.idx, f=e.target.dataset.field;
+        if(f==="amount"){ const v=parseInt(e.target.value.replace(/[^\d]/g,""),10); giftsRef[i].amount = isNaN(v)?0:v; }
+        else { giftsRef[i].icon = e.target.value || "🎁"; }
       });
     });
     wrap.querySelectorAll("[data-remove]").forEach(btn=>{
-      btn.addEventListener("click", (e)=>{
-        const i = +e.target.dataset.remove;
-        state.gifts.splice(i,1);
-        renderGiftEditor();
-      });
+      btn.addEventListener("click",(e)=>{ giftsRef.splice(+e.target.dataset.remove,1); renderGiftEditorInto(elId, giftsRef); });
     });
   }
-  $("addGiftRow").addEventListener("click", ()=>{
-    state.gifts.push({icon:"🎁", amount:5000});
-    renderGiftEditor();
-  });
-  renderGiftEditor();
 
-  /* ---------------- tabs ---------------- */
+  function readIdolSetupBlock(prefix){
+    const bankSel = $(prefix+"Bank");
+    let bankId = bankSel.value;
+    let bankLabel = BANKS.find(b=>b[0]===bankId)?.[1] || bankId;
+    if(bankId === "other"){
+      bankId = $(prefix+"BankOther").value.trim();
+      bankLabel = bankId;
+    }
+    const accountNo = $(prefix+"AccNo").value.trim().replace(/\s/g,"");
+    const accountName = $(prefix+"AccName").value.trim();
+    return {bankId, bankLabel, accountNo, accountName};
+  }
+
+  let createGifts = defaultGifts();
   $("tabCreate").addEventListener("click", ()=>{
     $("tabCreate").classList.add("active"); $("tabJoin").classList.remove("active");
     $("paneCreate").classList.remove("hidden"); $("paneJoin").classList.add("hidden");
@@ -458,79 +381,239 @@
     $("paneJoin").classList.remove("hidden"); $("paneCreate").classList.add("hidden");
   });
 
+  let createRole = "viewer";
+  function selectCreateRole(role){
+    createRole = role;
+    $("roleOptViewer").classList.toggle("selected", role==="viewer");
+    $("roleOptIdol").classList.toggle("selected", role==="idol");
+    const block = $("idolSetupCreate");
+    if(role === "idol"){
+      block.classList.remove("hidden");
+      if(!block.dataset.wired){
+        block.innerHTML = idolSetupHTML("cre");
+        wireIdolSetupBlock("cre", createGifts);
+        block.dataset.wired = "1";
+      }
+    } else {
+      block.classList.add("hidden");
+    }
+  }
+  $("roleOptViewer").addEventListener("click", ()=>selectCreateRole("viewer"));
+  $("roleOptIdol").addEventListener("click", ()=>selectCreateRole("idol"));
+
   function randomRoomId(){
     const words = ["qua","vui","yeu","song","live","tim","sao","mua","xuan","ha"];
     const w = words[Math.floor(Math.random()*words.length)];
     return `${w}-${Math.floor(1000+Math.random()*9000)}`;
   }
 
-  /* ---------------- create / join ---------------- */
   $("btnCreateRoom").addEventListener("click", ()=>{
     const name = $("nameCreate").value.trim();
-    const phone = $("momoPhone").value.trim();
+    const pass = $("passCreate").value;
     $("setupErr").textContent = "";
     if(!name){ $("setupErr").textContent = "Vui lòng nhập tên hiển thị."; return; }
-    if(!phone || phone.replace(/\D/g,"").length < 9){ $("setupErr").textContent = "Vui lòng nhập số điện thoại MoMo hợp lệ."; return; }
-    if(state.gifts.length === 0){ $("setupErr").textContent = "Thêm ít nhất một mốc quà tặng."; return; }
-    state.isHost = true;
-    state.myName = name;
-    state.momoPhone = phone;
-    state.roomId = randomRoomId();
+    if(!pass || pass.length < 4){ $("setupErr").textContent = "Mật khẩu tối thiểu 4 ký tự."; return; }
+
+    state.isRoomCreator = true;
+    state.myName = name; state.password = pass; state.roomId = randomRoomId();
+    state.myRole = createRole;
+    state.peerRole = createRole === "idol" ? "viewer" : "idol";
+
+    if(createRole === "idol"){
+      const pay = readIdolSetupBlock("cre");
+      if(!pay.bankId || !pay.accountNo || !pay.accountName){ $("setupErr").textContent = "Vui lòng điền đủ thông tin nhận tiền."; return; }
+      if(createGifts.length === 0){ $("setupErr").textContent = "Thêm ít nhất một mốc quà tặng."; return; }
+      state.payInfo = pay; state.gifts = createGifts;
+    }
     startAsHost();
   });
 
   $("btnJoinRoom").addEventListener("click", ()=>{
     const name = $("nameJoin").value.trim();
     const room = $("roomInput").value.trim();
+    const pass = $("passJoin").value;
     $("setupErr").textContent = "";
     if(!name){ $("setupErr").textContent = "Vui lòng nhập tên hiển thị."; return; }
     if(!room){ $("setupErr").textContent = "Vui lòng nhập mã phòng."; return; }
-    state.isHost = false;
-    state.myName = name;
-    state.roomId = room;
+    if(!pass){ $("setupErr").textContent = "Vui lòng nhập mật khẩu phòng."; return; }
+    state.isRoomCreator = false;
+    state.myName = name; state.password = pass; state.roomId = room;
     startAsGuest();
   });
 
   function goToCallScreen(){
     $("screen-setup").classList.add("hidden");
+    $("screen-idol-postjoin").classList.add("hidden");
     $("screen-call").classList.remove("hidden");
     $("roomPillWrap").classList.remove("hidden");
     $("roomCodeLabel").textContent = state.roomId;
-    renderGiftBar();
+    $("myRoleBadge").textContent = state.myRole === "idol" ? "🎤 Idol" : "🙋 Người xem";
+    $("myRoleBadge").className = "role-badge " + state.myRole;
+    applyRoleUI();
   }
 
   $("copyRoomBtn").addEventListener("click", ()=>{
-    navigator.clipboard?.writeText(state.roomId);
-    showSimpleToast("Đã sao chép mã phòng");
+    navigator.clipboard?.writeText(`Mã phòng: ${state.roomId}\nMật khẩu: ${state.password}`);
+    showSimpleToast("Đã sao chép mã phòng + mật khẩu");
   });
 
-  /* ---------------- media + peer ---------------- */
-  async function getMedia(){
-    try{
-      const stream = await navigator.mediaDevices.getUserMedia({video:true, audio:true});
-      state.localStream = stream;
-      $("localVideo").srcObject = stream;
-      return stream;
-    }catch(err){
-      $("setupErr").textContent = "Không thể truy cập camera/mic: " + err.message;
-      throw err;
+  function applyRoleUI(){
+    const amIViewer = state.myRole === "viewer";
+    $("giftBar").classList.toggle("hidden", !(amIViewer && state.gifts && state.gifts.length));
+    $("waitingForGifts").classList.toggle("hidden", !(amIViewer && !(state.gifts && state.gifts.length)));
+    $("qrBlock").classList.toggle("hidden", !amIViewer);
+    $("btnConfirmReceived").classList.toggle("hidden", amIViewer);
+    if(amIViewer) renderGiftBar();
+    renderQR();
+    renderLedger();
+  }
+
+  let joinGifts = defaultGifts();
+  function showIdolPostJoinSetup(){
+    $("screen-setup").classList.add("hidden");
+    $("screen-idol-postjoin").classList.remove("hidden");
+    const block = $("idolSetupJoin");
+    block.innerHTML = idolSetupHTML("joi");
+    wireIdolSetupBlock("joi", joinGifts);
+  }
+  $("btnFinishIdolSetup").addEventListener("click", ()=>{
+    const pay = readIdolSetupBlock("joi");
+    $("idolSetupErr").textContent = "";
+    if(!pay.bankId || !pay.accountNo || !pay.accountName){ $("idolSetupErr").textContent = "Vui lòng điền đủ thông tin nhận tiền."; return; }
+    if(joinGifts.length === 0){ $("idolSetupErr").textContent = "Thêm ít nhất một mốc quà tặng."; return; }
+    state.payInfo = pay; state.gifts = joinGifts;
+    if(state.dataConn && state.dataConn.open){
+      state.dataConn.send({type:"idolSetup", gifts: state.gifts, payInfo: state.payInfo});
     }
+    goToCallScreen();
+  });
+
+  async function getMedia(){
+    const stream = await navigator.mediaDevices.getUserMedia({video:true, audio:true});
+    state.localStream = stream;
+    $("localVideo").srcObject = stream;
+    return stream;
   }
 
   function setConn(text, live){
     $("connText").textContent = text;
     $("connDot").classList.toggle("live", !!live);
   }
+  function peerIdFor(roomId, role){ return "thaqua-" + roomId.replace(/[^a-z0-9-]/gi,"") + "-" + role; }
+
+  async function startAsHost(){
+    $("screen-setup").classList.add("hidden");
+    $("screen-call").classList.remove("hidden");
+    $("roomPillWrap").classList.remove("hidden");
+    $("roomCodeLabel").textContent = state.roomId;
+    $("myRoleBadge").textContent = state.myRole === "idol" ? "🎤 Idol" : "🙋 Người xem";
+    $("myRoleBadge").className = "role-badge " + state.myRole;
+    setConn("Đang khởi tạo phòng…", false);
+    applyRoleUI();
+
+    try{ await getMedia(); } catch(e){ setConn("Không thể mở camera/mic: " + e.message, false); return; }
+
+    const peer = new Peer(peerIdFor(state.roomId, "host"), {debug:0});
+    state.peer = peer;
+    peer.on("open", ()=> setConn("Đã sẵn sàng — chia sẻ mã phòng + mật khẩu để mời", false));
+    peer.on("error", (err)=> setConn("Lỗi kết nối: " + err.type, false));
+
+    peer.on("connection", (conn)=>{
+      conn.on("open", ()=>{
+        conn.on("data", (data)=>{
+          if(!data || data.type !== "joinRequest") return;
+          if(state.acceptedGuestId){
+            conn.send({type:"joinRejected", reason:"room-full"});
+            setTimeout(()=>conn.close(), 300);
+            return;
+          }
+          if(data.password !== state.password){
+            conn.send({type:"joinRejected", reason:"wrong-password"});
+            setTimeout(()=>conn.close(), 300);
+            return;
+          }
+          state.acceptedGuestId = conn.peer;
+          setupDataHandlers(conn);
+          conn.send({
+            type:"joinAccepted",
+            hostRole: state.myRole,
+            gifts: state.myRole === "idol" ? state.gifts : null,
+            payInfo: state.myRole === "idol" ? state.payInfo : null,
+          });
+          setConn(data.name + " đã tham gia phòng", true);
+        });
+      });
+    });
+
+    peer.on("call", (incomingCall)=>{
+      if(state.acceptedGuestId && incomingCall.peer !== state.acceptedGuestId){ incomingCall.close(); return; }
+      incomingCall.answer(state.localStream);
+      wireCall(incomingCall);
+    });
+  }
+
+  async function startAsGuest(){
+    $("screen-setup").classList.add("hidden");
+    $("screen-call").classList.remove("hidden");
+    setConn("Đang kết nối tới phòng…", false);
+
+    try{ await getMedia(); } catch(e){ setConn("Không thể mở camera/mic: " + e.message, false); return; }
+
+    const peer = new Peer(peerIdFor(state.roomId, "guest-" + Math.random().toString(36).slice(2,7)), {debug:0});
+    state.peer = peer;
+    peer.on("error", ()=> setConn("Không tìm thấy phòng hoặc lỗi kết nối", false));
+
+    peer.on("open", ()=>{
+      const hostId = peerIdFor(state.roomId, "host");
+      const conn = peer.connect(hostId, {reliable:true});
+      conn.on("open", ()=>{ conn.send({type:"joinRequest", password: state.password, name: state.myName}); });
+      conn.on("data", (data)=>{
+        if(!data) return;
+        if(data.type === "joinRejected"){
+          const msg = data.reason === "room-full" ? "Phòng đã có đủ 2 người." : "Sai mật khẩu phòng.";
+          setConn(msg, false);
+          $("screen-call").classList.add("hidden");
+          $("screen-setup").classList.remove("hidden");
+          $("setupErr").textContent = msg;
+          state.localStream && state.localStream.getTracks().forEach(t=>t.stop());
+          peer.destroy();
+          return;
+        }
+        if(data.type === "joinAccepted"){
+          state.peerRole = data.hostRole;
+          state.myRole = data.hostRole === "idol" ? "viewer" : "idol";
+          setupDataHandlers(conn);
+          if(data.gifts) state.gifts = data.gifts;
+          if(data.payInfo) state.payInfo = data.payInfo;
+
+          setConn("Đã kết nối — đang gọi video…", true);
+          const outgoingCall = peer.call(hostId, state.localStream);
+          wireCall(outgoingCall);
+
+          if(state.myRole === "idol" && !state.payInfo){
+            showIdolPostJoinSetup();
+          } else {
+            goToCallScreen();
+          }
+        }
+      });
+    });
+  }
 
   function setupDataHandlers(conn){
     state.dataConn = conn;
     conn.on("data", (data)=>{
-      if(data && data.type === "gift"){
+      if(!data) return;
+      if(data.type === "gift"){
         receiveGift(data.icon, data.amount, data.from);
-      } else if(data && data.type === "hostinfo"){
-        state.momoPhone = data.momoPhone;
-        state.gifts = data.gifts;
-        renderGiftBar();
+      } else if(data.type === "idolSetup"){
+        state.gifts = data.gifts; state.payInfo = data.payInfo;
+        applyRoleUI();
+        showSimpleToast("Idol đã thiết lập mốc quà tặng");
+      } else if(data.type === "resetTotal"){
+        state.unpaidTotal = 0;
+        state.log.unshift({divider:true, label:"Idol đã xác nhận nhận đủ tiền", t:new Date()});
+        renderLedger(); renderQR();
       }
     });
     conn.on("close", ()=>{
@@ -540,54 +623,6 @@
     });
   }
 
-  async function startAsHost(){
-    goToCallScreen();
-    setConn("Đang khởi tạo phòng…", false);
-    await getMedia();
-    const peer = new Peer(peerIdFor(state.roomId, "host"), {debug:0});
-    state.peer = peer;
-    peer.on("open", ()=>{ setConn("Đã sẵn sàng — chia sẻ mã phòng để mời", false); });
-    peer.on("error", (err)=>{ setConn("Lỗi kết nối: " + err.type, false); });
-
-    peer.on("connection", (conn)=>{
-      setupDataHandlers(conn);
-      conn.on("open", ()=>{
-        conn.send({type:"hostinfo", momoPhone: state.momoPhone, gifts: state.gifts});
-      });
-    });
-
-    peer.on("call", (incomingCall)=>{
-      incomingCall.answer(state.localStream);
-      wireCall(incomingCall);
-    });
-  }
-
-  async function startAsGuest(){
-    goToCallScreen();
-    setConn("Đang kết nối tới phòng…", false);
-    await getMedia();
-    const peer = new Peer(peerIdFor(state.roomId, "guest-" + Math.random().toString(36).slice(2,7)), {debug:0});
-    state.peer = peer;
-    peer.on("open", ()=>{
-      const hostId = peerIdFor(state.roomId, "host");
-      const conn = peer.connect(hostId, {reliable:true});
-      setupDataHandlers(conn);
-      conn.on("open", ()=>{ setConn("Đã kết nối — đang gọi video…", true); });
-
-      const outgoingCall = peer.call(hostId, state.localStream);
-      wireCall(outgoingCall);
-    });
-    peer.on("error", (err)=>{
-      setConn("Không tìm thấy phòng hoặc lỗi kết nối", false);
-      $("setupErr") && (null);
-    });
-  }
-
-  function peerIdFor(roomId, role){
-    // namespaced so random public broker collisions are unlikely
-    return "thaqua-" + roomId.replace(/[^a-z0-9-]/gi,"") + "-" + role;
-  }
-
   function wireCall(call){
     state.call = call;
     call.on("stream", (remoteStream)=>{
@@ -595,21 +630,18 @@
       $("remotePlaceholder").classList.add("hidden");
       setConn("Đang gọi video", true);
     });
-    call.on("close", endCallCleanupRemoteOnly);
+    call.on("close", ()=>{
+      $("remotePlaceholder").classList.remove("hidden");
+      $("remoteStatusText").textContent = "Cuộc gọi đã kết thúc";
+      setConn("Đã ngắt kết nối", false);
+    });
     call.on("error", ()=> setConn("Lỗi cuộc gọi video", false));
   }
 
-  function endCallCleanupRemoteOnly(){
-    $("remotePlaceholder").classList.remove("hidden");
-    $("remoteStatusText").textContent = "Cuộc gọi đã kết thúc";
-    setConn("Đã ngắt kết nối", false);
-  }
-
-  /* ---------------- gift bar + throwing ---------------- */
   function renderGiftBar(){
     const bar = $("giftBar");
     bar.innerHTML = "";
-    state.gifts.forEach((g)=>{
+    (state.gifts||[]).forEach((g)=>{
       const b = document.createElement("button");
       b.className = "gift-btn";
       b.innerHTML = `<span class="ic">${g.icon}</span><span class="amt">${fmt(g.amount)}</span>`;
@@ -620,27 +652,30 @@
 
   function throwGift(g){
     spawnFlyIcon(g.icon);
-    addToLedger(state.myName + " (bạn)", g);
+    logGift(state.myName + " (bạn)", g);
     if(state.dataConn && state.dataConn.open){
       state.dataConn.send({type:"gift", icon:g.icon, amount:g.amount, from: state.myName});
     }
     showGiftToast(`Bạn đã thả ${g.icon} ${fmt(g.amount)}`);
-    openMomoModal(g);
   }
 
   function receiveGift(icon, amount, from){
     spawnFlyIcon(icon);
-    addToLedger(from, {icon, amount});
-    showGiftToast(`${from} vừa thả ${icon} ${fmt(amount)} cho bạn!`);
+    logGift(from, {icon, amount});
+    showGiftToast(`${from} vừa thả ${icon} ${fmt(amount)}!`);
+  }
+
+  function logGift(from, g){
+    state.unpaidTotal += g.amount;
+    state.log.unshift({from, icon:g.icon, amount:g.amount, t:new Date()});
+    renderLedger(); renderQR();
   }
 
   function spawnFlyIcon(icon){
     const layer = $("flyLayer");
     const el = document.createElement("div");
-    el.className = "fly-icon";
-    el.textContent = icon;
-    const leftPct = 15 + Math.random()*70;
-    el.style.left = leftPct + "%";
+    el.className = "fly-icon"; el.textContent = icon;
+    el.style.left = (15 + Math.random()*70) + "%";
     el.style.setProperty("--drift1", (Math.random()*30-15)+"px");
     el.style.setProperty("--drift2", (Math.random()*40-20)+"px");
     el.style.setProperty("--drift3", (Math.random()*30-15)+"px");
@@ -651,78 +686,69 @@
   function showGiftToast(text){
     const stack = $("toastStack");
     const el = document.createElement("div");
-    el.className = "gift-toast";
-    el.textContent = text;
+    el.className = "gift-toast"; el.textContent = text;
     stack.appendChild(el);
     setTimeout(()=> el.remove(), 3100);
   }
   function showSimpleToast(text){
     const el = document.createElement("div");
-    el.className = "toast-simple";
-    el.textContent = text;
+    el.className = "toast-simple"; el.textContent = text;
     document.body.appendChild(el);
     setTimeout(()=> el.remove(), 2200);
   }
 
-  function addToLedger(from, g){
-    state.totalThrown += g.amount;
-    state.log.unshift({from, icon:g.icon, amount:g.amount, t: new Date()});
-    renderLedger();
-  }
-
   function renderLedger(){
-    $("totalGiftText").textContent = fmt(state.totalThrown) + " đã thả";
-    $("ledgerTotal").textContent = fmt(state.totalThrown);
+    $("totalGiftText").textContent = fmt(state.unpaidTotal) + " đã thả";
+    $("ledgerTotal").textContent = fmt(state.unpaidTotal);
     const list = $("ledgerList");
     if(state.log.length === 0){
-      list.innerHTML = `<div class="ledger-empty">Chưa có quà nào được thả. Bấm icon bên dưới video để bắt đầu 🎁</div>`;
+      list.innerHTML = `<div class="ledger-empty">Chưa có quà nào được thả.</div>`;
       return;
     }
     list.innerHTML = "";
-    state.log.slice(0,60).forEach(item=>{
+    state.log.slice(0,80).forEach(item=>{
       const row = document.createElement("div");
-      row.className = "ledger-item";
       const time = item.t.toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'});
-      row.innerHTML = `<span>${item.icon} ${item.from} <span style="color:var(--ink-faint)">· ${time}</span></span><b>${fmt(item.amount)}</b>`;
+      if(item.divider){
+        row.className = "ledger-item divider";
+        row.textContent = `${item.label} · ${time}`;
+      } else {
+        row.className = "ledger-item";
+        row.innerHTML = `<span>${item.icon} ${item.from} <span style="color:var(--ink-faint)">· ${time}</span></span><b>${fmt(item.amount)}</b>`;
+      }
       list.appendChild(row);
     });
   }
 
-  /* ---------------- momo modal ---------------- */
-  let pendingGift = null;
-  function openMomoModal(g){
-    pendingGift = g;
-    $("modalIcon").textContent = g.icon + " Chuyển quà qua MoMo";
-    $("modalAmount").textContent = fmt(g.amount);
-    $("modalPhone").textContent = state.momoPhone || "Người nhận chưa cung cấp số";
-    $("modalMsg").textContent = `Tặng ${g.icon} trong buổi gọi`;
-    $("momoModal").classList.remove("hidden");
+  function renderQR(){
+    if(state.myRole !== "viewer") return;
+    const wrap = $("qrImgWrap");
+    const meta = $("qrMeta");
+    $("qrAmount").textContent = fmt(state.unpaidTotal);
+    if(!state.payInfo || !state.payInfo.accountNo){
+      wrap.innerHTML = `<div class="qr-empty">Idol chưa thiết lập thông tin nhận tiền</div>`;
+      meta.innerHTML = ""; return;
+    }
+    if(state.unpaidTotal <= 0){
+      wrap.innerHTML = `<div class="qr-empty">Chưa có quà nào cần thanh toán</div>`;
+    } else {
+      const addInfo = stripVN(`Qua tang ${state.roomId}`).slice(0,25);
+      const accName = stripVN(state.payInfo.accountName).toUpperCase();
+      const url = `https://img.vietqr.io/image/${encodeURIComponent(state.payInfo.bankId)}-${encodeURIComponent(state.payInfo.accountNo)}-compact2.png`
+        + `?amount=${state.unpaidTotal}&addInfo=${encodeURIComponent(addInfo)}&accountName=${encodeURIComponent(accName)}`;
+      wrap.innerHTML = `<img src="${url}" alt="QR chuyển tiền">`;
+    }
+    meta.innerHTML = `Ngân hàng: <b>${state.payInfo.bankLabel}</b><br>STK: <b>${state.payInfo.accountNo}</b><br>Chủ TK: <b>${state.payInfo.accountName}</b>`;
   }
-  $("modalDone").addEventListener("click", ()=>{
-    $("momoModal").classList.add("hidden");
-    showSimpleToast("Cảm ơn bạn đã ủng hộ! 💖");
-  });
-  $("copyPhoneBtn").addEventListener("click", ()=>{
-    navigator.clipboard?.writeText(state.momoPhone || "");
-    showSimpleToast("Đã sao chép số điện thoại");
-  });
-  $("copyMsgBtn").addEventListener("click", ()=>{
-    navigator.clipboard?.writeText($("modalMsg").textContent);
-    showSimpleToast("Đã sao chép lời nhắn");
-  });
-  $("modalOpenMomo").addEventListener("click", ()=>{
-    // Best-effort: MoMo doesn't publish an official deep link for pre-filled
-    // personal transfers, so we try the app scheme and fall back gracefully.
-    const before = Date.now();
-    window.location.href = "momo://";
-    setTimeout(()=>{
-      if(Date.now() - before < 1600){
-        showSimpleToast("Nếu MoMo chưa mở, hãy mở app thủ công");
-      }
-    }, 1200);
+
+  $("btnConfirmReceived").addEventListener("click", ()=>{
+    state.unpaidTotal = 0;
+    state.log.unshift({divider:true, label:"Bạn đã xác nhận nhận đủ tiền", t:new Date()});
+    renderLedger(); renderQR();
+    if(state.dataConn && state.dataConn.open){ state.dataConn.send({type:"resetTotal"}); }
+    showSimpleToast("Đã reset tổng quà — cảm ơn bạn!");
   });
 
-  /* ---------------- controls ---------------- */
   $("btnMic").addEventListener("click", ()=>{
     if(!state.localStream) return;
     state.micOn = !state.micOn;
@@ -747,6 +773,7 @@
     }
   });
 
+  selectCreateRole("viewer");
 })();
 </script>
 </body>
