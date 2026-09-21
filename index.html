@@ -90,20 +90,39 @@
   /* ---------- call screen ---------- */
   .call-wrap{ flex:1; display:flex; min-height:0; width:100%; position:relative; }
   .stage{ flex:1; position:relative; display:flex; align-items:center; justify-content:center; background:#000; overflow:hidden; }
-  video{ width:100%; height:100%; object-fit:cover; background:#050405; }
-  #remoteVideo{ position:absolute; inset:0; }
+  video{ width:100%; height:100%; object-fit:cover; background:#050405; display:block; }
+  #mainVideo{ position:absolute; inset:0; }
+  #mainVideo.mirrored{ transform:scaleX(-1); }
+
   .self-pip{
-    position:absolute; z-index:5; overflow:hidden;
+    position:absolute; z-index:8; overflow:hidden; touch-action:none; cursor:grab;
     right:calc(16px + env(safe-area-inset-right,0px)); bottom:110px;
-    width:150px; aspect-ratio:3/4; border-radius:14px;
-    border:2px solid rgba(255,255,255,.18); box-shadow:0 8px 24px rgba(0,0,0,.5);
-    transition:right .2s ease, bottom .2s ease, top .2s ease, width .2s ease;
+    width:128px; aspect-ratio:3/4; border-radius:14px; background:#050405;
+    border:1px solid rgba(255,255,255,.2); box-shadow:0 8px 22px rgba(0,0,0,.5);
   }
-  .self-pip video{ transform:scaleX(-1); }
+  .self-pip.dragging{ cursor:grabbing !important; transition:none !important; box-shadow:0 14px 30px rgba(0,0,0,.6); }
+  .self-pip.pip-hidden{ display:none; }
+  #pipVideo{ width:100%; height:100%; }
+  #pipVideo.mirrored{ transform:scaleX(-1); }
+  .pip-empty{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:var(--ink-faint); font-size:22px; background:var(--bg-2); }
+  .pip-controls{ position:absolute; top:4px; right:4px; display:flex; gap:4px; z-index:2; }
+  .pip-btn{
+    width:20px; height:20px; border-radius:50%; border:1px solid rgba(255,255,255,.22);
+    background:rgba(10,8,12,.6); backdrop-filter:blur(6px); color:#fff; font-size:10px;
+    display:flex; align-items:center; justify-content:center; cursor:pointer; padding:0;
+  }
+  .pip-show-btn{
+    position:absolute; z-index:8; right:calc(16px + env(safe-area-inset-right,0px)); bottom:110px;
+    width:32px; height:32px; border-radius:50%; cursor:pointer;
+    background:rgba(255,255,255,.09); backdrop-filter:blur(18px) saturate(180%); -webkit-backdrop-filter:blur(18px) saturate(180%);
+    border:1px solid rgba(255,255,255,.16); color:var(--ink); font-size:14px;
+    display:flex; align-items:center; justify-content:center;
+  }
   .fit-toggle-btn{
     position:absolute; z-index:6; left:calc(16px + env(safe-area-inset-left,0px)); bottom:110px;
-    background:rgba(15,11,18,.66); backdrop-filter:blur(6px); border:1px solid var(--line);
-    color:var(--ink-dim); font-size:11.5px; padding:7px 12px; border-radius:999px; cursor:pointer;
+    background:rgba(255,255,255,.08); backdrop-filter:blur(18px) saturate(180%); -webkit-backdrop-filter:blur(18px) saturate(180%);
+    border:1px solid rgba(255,255,255,.15);
+    color:var(--ink-dim); font-size:11px; padding:6px 11px; border-radius:999px; cursor:pointer;
   }
   .placeholder-avatar{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:10px; color:var(--ink-faint); background:var(--bg-2); text-align:center; padding:20px; }
   .placeholder-avatar .circle{ width:74px;height:74px;border-radius:50%; background:linear-gradient(135deg,var(--panel-2),var(--bg-2)); display:flex;align-items:center;justify-content:center;font-size:30px; border:1px solid var(--line); }
@@ -185,21 +204,31 @@
 
   .controls{
     flex-shrink:0; position:absolute; left:0; right:0; bottom:0; z-index:15;
-    padding:14px 18px calc(18px + env(safe-area-inset-bottom,0px));
-    padding-left:calc(18px + env(safe-area-inset-left,0px));
-    padding-right:calc(18px + env(safe-area-inset-right,0px));
-    background:linear-gradient(180deg, transparent, rgba(0,0,0,.55) 40%);
+    padding:12px 16px calc(14px + env(safe-area-inset-bottom,0px));
+    padding-left:calc(16px + env(safe-area-inset-left,0px));
+    padding-right:calc(16px + env(safe-area-inset-right,0px));
+    background:linear-gradient(180deg, transparent, rgba(0,0,0,.4) 55%);
   }
-  .gift-bar{ display:flex; gap:10px; overflow-x:auto; padding:4px 2px 14px; scrollbar-width:none; }
+  .gift-bar{ display:flex; gap:8px; overflow-x:auto; padding:4px 2px 12px; scrollbar-width:none; }
   .gift-bar::-webkit-scrollbar{ display:none; }
-  .gift-btn{ flex-shrink:0; width:74px; background:rgba(28,21,32,.78); backdrop-filter:blur(6px); border:1px solid var(--line); border-radius:16px; padding:10px 6px 8px; color:var(--ink); cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:4px; }
-  .gift-btn .ic{ font-size:26px; }
-  .gift-btn .amt{ font-size:10.5px; color:var(--gold); font-weight:700; white-space:nowrap; }
+  .gift-btn{
+    flex-shrink:0; width:58px; padding:7px 4px 6px; border-radius:14px; cursor:pointer;
+    display:flex; flex-direction:column; align-items:center; gap:3px; color:var(--ink);
+    background:rgba(255,255,255,.08); backdrop-filter:blur(18px) saturate(180%); -webkit-backdrop-filter:blur(18px) saturate(180%);
+    border:1px solid rgba(255,255,255,.14);
+  }
+  .gift-btn .ic{ font-size:20px; }
+  .gift-btn .amt{ font-size:9px; color:var(--gold); font-weight:700; white-space:nowrap; }
   .gift-btn:active{ transform:scale(.94); border-color:var(--momo-2); }
   .waiting-strip{ text-align:center; color:var(--ink-faint); font-size:12.5px; padding:14px 0; }
 
-  .action-row{ display:flex; align-items:center; justify-content:center; gap:14px; }
-  .round-btn{ position:relative; width:52px; height:52px; border-radius:50%; border:1px solid var(--line); background:rgba(28,21,32,.78); backdrop-filter:blur(6px); color:var(--ink); font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+  .action-row{ display:flex; align-items:center; justify-content:center; gap:10px; }
+  .round-btn{
+    position:relative; width:42px; height:42px; border-radius:50%; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; font-size:16px; color:var(--ink);
+    background:rgba(255,255,255,.08); backdrop-filter:blur(18px) saturate(180%); -webkit-backdrop-filter:blur(18px) saturate(180%);
+    border:1px solid rgba(255,255,255,.14);
+  }
   .chat-badge{ position:absolute; top:-3px; right:-3px; background:var(--danger); color:#fff; font-size:10px; font-weight:800; min-width:17px; height:17px; padding:0 3px; border-radius:999px; display:flex; align-items:center; justify-content:center; border:2px solid var(--bg); }
 
   /* ---------- realtime chat panel: iOS-style frosted glass, compact ---------- */
@@ -247,9 +276,53 @@
   @media (max-width:640px){
     .chat-panel{ left:calc(10px + env(safe-area-inset-left,0px)); right:calc(10px + env(safe-area-inset-right,0px)); width:auto; bottom:calc(118px + env(safe-area-inset-bottom,0px)); max-height:36vh; }
   }
-  .round-btn.off{ background:rgba(239,84,97,.22); border-color:rgba(239,84,97,.5); }
-  .round-btn.end{ background:var(--danger); border-color:var(--danger); width:60px; }
-  .round-btn.fs{ background:rgba(242,181,68,.16); border-color:rgba(242,181,68,.4); }
+
+  /* ---------- beauty filter panel: same glass language, opposite side from chat ---------- */
+  .filter-panel{
+    position:absolute; z-index:40; left:calc(14px + env(safe-area-inset-left,0px));
+    bottom:calc(140px + env(safe-area-inset-bottom,0px));
+    width:min(240px, 74vw);
+    display:flex; flex-direction:column;
+    background:rgba(40,32,46,.38);
+    backdrop-filter:blur(28px) saturate(180%); -webkit-backdrop-filter:blur(28px) saturate(180%);
+    border:1px solid rgba(255,255,255,.16); border-radius:16px; overflow:hidden;
+    box-shadow:0 14px 34px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.08);
+    animation:chatIn .2s ease;
+  }
+  .filter-header{
+    display:flex; align-items:center; justify-content:space-between; padding:9px 12px;
+    border-bottom:1px solid rgba(255,255,255,.1); font-size:12px; font-weight:700;
+    background:rgba(255,255,255,.03);
+  }
+  .filter-header button{ background:none; border:none; color:var(--ink-dim); font-size:15px; cursor:pointer; padding:2px 4px; line-height:1; }
+  .filter-body{ padding:10px 12px 12px; display:flex; flex-direction:column; gap:9px; }
+  .filter-row{ display:flex; flex-direction:column; gap:3px; }
+  .filter-row .flabel{ display:flex; justify-content:space-between; font-size:10.5px; color:var(--ink-dim); }
+  .filter-row .flabel b{ color:var(--gold); font-weight:700; }
+  .filter-row input[type=range]{
+    -webkit-appearance:none; width:100%; height:4px; border-radius:999px;
+    background:rgba(255,255,255,.18); outline:none; margin:2px 0;
+  }
+  .filter-row input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none; width:14px; height:14px; border-radius:50%;
+    background:var(--momo-2); cursor:pointer; box-shadow:0 0 0 3px rgba(255,95,174,.22);
+  }
+  .filter-row input[type=range]::-moz-range-thumb{
+    width:14px; height:14px; border-radius:50%; border:none; background:var(--momo-2); cursor:pointer;
+  }
+  .filter-presets{ display:flex; gap:6px; margin-top:2px; flex-wrap:wrap; }
+  .filter-preset-btn{
+    flex:1; min-width:60px; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.14);
+    color:var(--ink); font-size:10.5px; padding:6px 4px; border-radius:9px; cursor:pointer;
+  }
+  .filter-preset-btn.active{ background:rgba(216,45,139,.35); border-color:var(--momo-2); color:#fff; }
+  @media (max-width:640px){
+    .filter-panel{ left:calc(10px + env(safe-area-inset-left,0px)); width:min(210px,68vw); bottom:calc(118px + env(safe-area-inset-bottom,0px)); }
+  }
+  .round-btn.filter-on{ background:rgba(216,45,139,.28); border-color:rgba(255,95,174,.5); }
+  .round-btn.off{ background:rgba(239,84,97,.25); border-color:rgba(239,84,97,.5); }
+  .round-btn.end{ background:rgba(239,84,97,.35); border-color:rgba(239,84,97,.5); width:48px; }
+  .round-btn.fs{ background:rgba(242,181,68,.18); border-color:rgba(242,181,68,.35); }
 
   /* ---------- mobile: prioritize full-frame video, tighter chrome ---------- */
   @media (max-width:640px){
@@ -260,17 +333,16 @@
     .setup-wrap{ padding:20px 12px; align-items:flex-start; }
     .setup-card{ padding:22px 18px 20px; border-radius:18px; }
     .setup-card h1{ font-size:19px; }
-    .self-pip{ width:96px; top:calc(14px + env(safe-area-inset-top,0px)); right:calc(12px + env(safe-area-inset-right,0px)); bottom:auto; border-radius:12px; }
     .fit-toggle-btn{ bottom:auto; top:calc(14px + env(safe-area-inset-top,0px)); left:calc(12px + env(safe-area-inset-left,0px)); font-size:10.5px; padding:5px 10px; }
     .status-chip{ display:none; } /* redundant on small screens, saves space for video */
     .total-chip{ font-size:11.5px; padding:6px 11px; top:calc(14px + env(safe-area-inset-top,0px)); }
-    .gift-bar{ gap:8px; padding-bottom:10px; }
-    .gift-btn{ width:62px; padding:8px 4px 6px; }
-    .gift-btn .ic{ font-size:22px; }
-    .gift-btn .amt{ font-size:9.5px; }
-    .round-btn{ width:46px; height:46px; font-size:18px; }
-    .round-btn.end{ width:52px; }
-    .action-row{ gap:10px; }
+    .gift-bar{ gap:6px; padding-bottom:10px; }
+    .gift-btn{ width:50px; padding:6px 3px 5px; }
+    .gift-btn .ic{ font-size:18px; }
+    .gift-btn .amt{ font-size:8.5px; }
+    .round-btn{ width:38px; height:38px; font-size:15px; }
+    .round-btn.end{ width:44px; }
+    .action-row{ gap:8px; }
     .mega-banner .line1{ font-size:30px; }
     .mega-banner .line2{ font-size:15px; }
   }
@@ -383,13 +455,26 @@
   <!-- ============ CALL SCREEN ============ -->
   <section id="screen-call" class="call-wrap hidden">
     <div class="stage">
-      <video id="remoteVideo" autoplay playsinline></video>
+      <video id="mainVideo" autoplay playsinline></video>
       <div class="placeholder-avatar" id="remotePlaceholder">
         <div class="circle">👤</div>
         <div id="remoteStatusText">Đang chờ người kia tham gia…</div>
       </div>
 
-      <div class="self-pip"><video id="localVideo" autoplay playsinline muted></video></div>
+      <!-- Hidden raw camera + canvas used to render beauty filters before sending the stream out -->
+      <video id="rawPreviewVideo" autoplay playsinline muted style="position:absolute; width:2px; height:2px; opacity:0; pointer-events:none; left:-9999px;"></video>
+      <canvas id="filterCanvas" style="position:absolute; width:2px; height:2px; opacity:0; pointer-events:none; left:-9999px;"></canvas>
+
+      <div class="self-pip" id="selfPip">
+        <video id="pipVideo" autoplay playsinline muted></video>
+        <div class="pip-empty hidden" id="pipEmpty">👤</div>
+        <div class="pip-controls">
+          <button class="pip-btn" id="btnSwapVideo" title="Đổi video chính ⇄ preview">⇄</button>
+          <button class="pip-btn" id="btnHidePip" title="Ẩn khung xem trước">✕</button>
+        </div>
+      </div>
+      <button class="pip-show-btn hidden" id="btnShowPip" title="Hiện khung xem trước của bạn">👁</button>
+
       <button class="fit-toggle-btn" id="btnFitToggle" title="Đổi cách hiển thị video">▢ Vừa khung hình</button>
 
       <div class="status-chip"><span class="dot" id="connDot"></span><span id="connText">Đang kết nối…</span></div>
@@ -408,7 +493,37 @@
         <div class="chat-messages" id="chatMessages"><div class="chat-empty">Chưa có tin nhắn nào — nhắn gì đó cho nhau nhé 👋</div></div>
         <div class="chat-input-row">
           <input type="text" id="chatInput" placeholder="Nhắn gì đó…" maxlength="500">
-          <button id="btnSendChat">Gửi</button>
+          <button type="button" id="btnSendChat">Gửi</button>
+        </div>
+      </div>
+
+      <div class="filter-panel hidden" id="filterPanel">
+        <div class="filter-header">
+          <span>✨ Làm đẹp</span>
+          <button id="btnCloseFilter" title="Đóng">✕</button>
+        </div>
+        <div class="filter-body">
+          <div class="filter-presets">
+            <button class="filter-preset-btn active" data-preset="natural" type="button">Tự nhiên</button>
+            <button class="filter-preset-btn" data-preset="bright" type="button">Rạng rỡ</button>
+            <button class="filter-preset-btn" data-preset="soft" type="button">Mềm mại</button>
+          </div>
+          <div class="filter-row">
+            <div class="flabel"><span>Sáng da</span><b id="valBrightness">0</b></div>
+            <input type="range" id="fBrightness" min="-20" max="30" value="0">
+          </div>
+          <div class="filter-row">
+            <div class="flabel"><span>Mịn da</span><b id="valSmooth">0</b></div>
+            <input type="range" id="fSmooth" min="0" max="100" value="0">
+          </div>
+          <div class="filter-row">
+            <div class="flabel"><span>Rực rỡ</span><b id="valSaturate">0</b></div>
+            <input type="range" id="fSaturate" min="-30" max="40" value="0">
+          </div>
+          <div class="filter-row">
+            <div class="flabel"><span>Ấm màu</span><b id="valWarmth">0</b></div>
+            <input type="range" id="fWarmth" min="-20" max="20" value="0">
+          </div>
         </div>
       </div>
 
@@ -418,6 +533,7 @@
         <div class="action-row">
           <button class="round-btn" id="btnMic" title="Tắt/bật mic">🎙️</button>
           <button class="round-btn" id="btnCam" title="Tắt/bật camera">📷</button>
+          <button class="round-btn" id="btnToggleFilter" title="Làm đẹp">✨</button>
           <button class="round-btn" id="btnToggleChat" title="Trò chuyện">💬<span class="chat-badge hidden" id="chatBadge">0</span></button>
           <button class="round-btn fs" id="btnFullscreen" title="Toàn màn hình">⛶</button>
           <button class="round-btn end" id="btnEnd" title="Kết thúc">✕</button>
@@ -455,7 +571,8 @@
     payInfo:null, gifts:[],
     unpaidTotal:0, log:[],
     chatLog:[], chatUnread:0, chatOpen:false,
-    peer:null, call:null, dataConn:null, localStream:null,
+    peer:null, call:null, dataConn:null, localStream:null, previewStream:null, remoteStream:null,
+    mainIsLocal:false, pipVisible:true,
     micOn:true, camOn:true,
     acceptedGuestId:null,
   };
@@ -513,7 +630,7 @@
   /* ---------- video fit: cover (fill/crop, ưu tiên full khung hình) vs contain (thấy trọn khung hình) ---------- */
   let videoFitMode = "cover";
   function applyVideoFit(){
-    $("remoteVideo").style.objectFit = videoFitMode;
+    $("mainVideo").style.objectFit = videoFitMode;
     $("btnFitToggle").textContent = videoFitMode === "cover" ? "▢ Vừa khung hình" : "◱ Lấp đầy màn hình";
   }
 
@@ -532,6 +649,29 @@
       .replace(/đ/g,"d").replace(/Đ/g,"D")
       .replace(/[^a-zA-Z0-9\s]/g,"")
       .trim();
+  }
+
+  /* ---------- gentle two-note chime when someone joins the room ---------- */
+  function playJoinSound(){
+    try{
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      if(!Ctx) return;
+      const ctx = new Ctx();
+      const now = ctx.currentTime;
+      [659.25, 987.77].forEach((freq, i)=>{
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.value = freq;
+        const t0 = now + i*0.13;
+        gain.gain.setValueAtTime(0.0001, t0);
+        gain.gain.exponentialRampToValueAtTime(0.2, t0 + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.32);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(t0); osc.stop(t0 + 0.34);
+      });
+      setTimeout(()=>{ try{ ctx.close(); }catch(e){} }, 800);
+    }catch(e){}
   }
 
   function idolSetupHTML(prefix){
@@ -725,11 +865,89 @@
     goToCallScreen();
   });
 
+  /* ---------- camera capture -> canvas beauty filters -> outgoing stream ---------- */
+  const filterState = { brightness:0, smooth:0, saturate:0, warmth:0 };
+  let filterCtx = null, filterLoopId = null;
+
+  function buildCssFilter(){
+    const b = 1 + filterState.brightness/100;      // brightness multiplier
+    const s = 1 + filterState.saturate/100;         // saturation multiplier
+    const hue = filterState.warmth * -1;             // warm = slight negative hue-rotate
+    const sepia = filterState.warmth > 0 ? Math.min(filterState.warmth/60, 0.22) : 0;
+    return `brightness(${b.toFixed(2)}) saturate(${Math.max(s,0.3).toFixed(2)}) hue-rotate(${hue}deg) sepia(${sepia.toFixed(2)}) contrast(1.02)`;
+  }
+
+  function filterLoop(){
+    const canvas = $("filterCanvas");
+    const raw = $("rawPreviewVideo");
+    if(filterCtx && canvas.width > 0 && raw.readyState >= 2){
+      if(state.camOn){
+        filterCtx.save();
+        filterCtx.filter = buildCssFilter();
+        filterCtx.drawImage(raw, 0, 0, canvas.width, canvas.height);
+        if(filterState.smooth > 0){
+          const blurPx = Math.max(1, (filterState.smooth/100) * (canvas.width/90));
+          filterCtx.filter = `blur(${blurPx.toFixed(1)}px) brightness(1.02)`;
+          filterCtx.globalAlpha = Math.min(0.62, filterState.smooth/100 * 0.62);
+          filterCtx.drawImage(raw, 0, 0, canvas.width, canvas.height);
+          filterCtx.globalAlpha = 1;
+        }
+        filterCtx.restore();
+      } else {
+        filterCtx.fillStyle = "#0e0b12";
+        filterCtx.fillRect(0, 0, canvas.width, canvas.height);
+      }
+    }
+    filterLoopId = requestAnimationFrame(filterLoop);
+  }
+
   async function getMedia(){
     const stream = await navigator.mediaDevices.getUserMedia({video:true, audio:true});
     state.localStream = stream;
-    $("localVideo").srcObject = stream;
+
+    const raw = $("rawPreviewVideo");
+    raw.srcObject = stream;
+    try{ await raw.play(); }catch(e){}
+    if(raw.readyState < 2){
+      await new Promise(res=>{ raw.onloadedmetadata = ()=> res(); setTimeout(res, 1500); });
+    }
+
+    const canvas = $("filterCanvas");
+    canvas.width = raw.videoWidth || 640;
+    canvas.height = raw.videoHeight || 480;
+    filterCtx = canvas.getContext("2d");
+    if(filterLoopId) cancelAnimationFrame(filterLoopId);
+    filterLoop();
+
+    let previewStream;
+    try{
+      const canvasStream = canvas.captureStream(25);
+      previewStream = new MediaStream([...canvasStream.getVideoTracks(), ...stream.getAudioTracks()]);
+    }catch(e){
+      previewStream = stream; // fallback: if captureStream unsupported, send the raw camera feed
+    }
+    state.previewStream = previewStream;
+    refreshVideoLayout();
     return stream;
+  }
+
+  /* ---------- decide what plays in the big slot vs the small preview ---------- */
+  function refreshVideoLayout(){
+    const mainEl = $("mainVideo"), pipEl = $("pipVideo");
+    const mainKind = state.mainIsLocal ? "local" : "remote";
+    const pipKind = state.mainIsLocal ? "remote" : "local";
+
+    mainEl.srcObject = mainKind === "local" ? (state.previewStream || null) : (state.remoteStream || null);
+    mainEl.classList.toggle("mirrored", mainKind === "local");
+
+    pipEl.srcObject = pipKind === "local" ? (state.previewStream || null) : (state.remoteStream || null);
+    pipEl.classList.toggle("mirrored", pipKind === "local");
+
+    const mainMissing = mainKind === "local" ? !state.previewStream : !state.remoteStream;
+    $("remotePlaceholder").classList.toggle("hidden", !mainMissing);
+
+    const pipMissing = pipKind === "local" ? !state.previewStream : !state.remoteStream;
+    $("pipEmpty").classList.toggle("hidden", !pipMissing);
   }
 
   function setConn(text, live){
@@ -774,6 +992,7 @@
               payInfo: state.myRole === "idol" ? state.payInfo : null,
             });
             setConn(data.name + " đã tham gia phòng", true);
+            playJoinSound();
             return;
           }
           if(state.acceptedGuestId !== conn.peer) return;
@@ -785,7 +1004,7 @@
 
     peer.on("call", (incomingCall)=>{
       if(state.acceptedGuestId && incomingCall.peer !== state.acceptedGuestId){ incomingCall.close(); return; }
-      incomingCall.answer(state.localStream);
+      incomingCall.answer(state.previewStream || state.localStream);
       wireCall(incomingCall);
     });
   }
@@ -814,6 +1033,8 @@
           $("screen-setup").classList.remove("hidden");
           $("setupErr").textContent = msg;
           state.localStream && state.localStream.getTracks().forEach(t=>t.stop());
+          state.previewStream && state.previewStream.getTracks().forEach(t=>t.stop());
+          if(filterLoopId) cancelAnimationFrame(filterLoopId);
           peer.destroy();
           return;
         }
@@ -825,7 +1046,8 @@
           if(data.payInfo) state.payInfo = data.payInfo;
 
           setConn("Đã kết nối — đang gọi video…", true);
-          const outgoingCall = peer.call(hostId, state.localStream);
+          playJoinSound();
+          const outgoingCall = peer.call(hostId, state.previewStream || state.localStream);
           wireCall(outgoingCall);
 
           if(state.myRole === "idol" && !state.payInfo){
@@ -859,9 +1081,9 @@
 
   function handleConnClose(conn){
     setConn("Người kia đã rời phòng", false);
-    $("remotePlaceholder").classList.remove("hidden");
     $("remoteStatusText").textContent = "Người kia đã rời phòng";
-    $("remoteVideo").srcObject = null;
+    state.remoteStream = null;
+    refreshVideoLayout();
     if(state.call){ try{ state.call.close(); }catch(e){} state.call = null; }
     if(state.acceptedGuestId === conn.peer){ state.acceptedGuestId = null; }
     if(state.dataConn === conn){ state.dataConn = null; }
@@ -870,12 +1092,13 @@
   function wireCall(call){
     state.call = call;
     call.on("stream", (remoteStream)=>{
-      $("remoteVideo").srcObject = remoteStream;
-      $("remotePlaceholder").classList.add("hidden");
+      state.remoteStream = remoteStream;
+      refreshVideoLayout();
       setConn("Đang gọi video", true);
     });
     call.on("close", ()=>{
-      $("remotePlaceholder").classList.remove("hidden");
+      state.remoteStream = null;
+      refreshVideoLayout();
       $("remoteStatusText").textContent = "Cuộc gọi đã kết thúc";
       setConn("Đã ngắt kết nối", false);
     });
@@ -1087,7 +1310,8 @@
   $("btnCam").addEventListener("click", ()=>{
     if(!state.localStream) return;
     state.camOn = !state.camOn;
-    state.localStream.getVideoTracks().forEach(t=> t.enabled = state.camOn);
+    // Không tắt track camera gốc — vòng lặp lọc ảnh (filterLoop) sẽ tự vẽ nền đen
+    // lên canvas khi camOn=false, vì canvas mới là nguồn video thực sự được gửi đi.
     $("btnCam").classList.toggle("off", !state.camOn);
     $("btnCam").textContent = state.camOn ? "📷" : "🚫";
   });
@@ -1135,7 +1359,6 @@
       return;
     }
     box.innerHTML = state.chatLog.map(m=>{
-      console.log(m);
       const time = new Date(m.t).toLocaleTimeString('vi-VN',{hour:'2-digit',minute:'2-digit'});
       const whoLabel = m.who === "me" ? "Bạn" : m.from;
       return `<div class="chat-msg ${m.who}"><div class="who">${escapeHtml(whoLabel)} · ${time}</div>${escapeHtml(m.text)}</div>`;
@@ -1154,10 +1377,13 @@
     state.chatOpen = false;
     $("chatPanel").classList.add("hidden");
   }
+  let sendingChatLock = false;
   function sendChatMessage(){
+    if(sendingChatLock) return;
     const input = $("chatInput");
     const text = input.value.trim();
     if(!text) return;
+    sendingChatLock = true;
     const t = Date.now();
     const id = t + "-" + Math.random().toString(36).slice(2,8);
     addChatMessage("me", state.myName, text, t, id);
@@ -1167,12 +1393,28 @@
       showSimpleToast("Chưa kết nối được với người kia");
     }
     input.value = "";
+    setTimeout(()=>{ sendingChatLock = false; }, 60);
   }
   $("btnToggleChat").addEventListener("click", ()=>{ state.chatOpen ? closeChat() : openChat(); });
   $("btnCloseChat").addEventListener("click", closeChat);
   $("btnSendChat").addEventListener("click", sendChatMessage);
+  // Bộ gõ tiếng Việt (Telex/VNI) đang soạn thảo (composing) khi Enter được nhấn để
+  // kết thúc dấu/âm cuối — nếu không chặn, trình duyệt bắn thêm một sự kiện Enter
+  // sau khi composition kết thúc, gây gửi trùng phần chữ cuối. Bỏ qua Enter trong
+  // và ngay sau khi đang gõ tiếng Việt để tránh gửi trùng.
+  let vnComposing = false;
+  let vnComposingJustEnded = false;
+  $("chatInput").addEventListener("compositionstart", ()=>{ vnComposing = true; });
+  $("chatInput").addEventListener("compositionend", ()=>{
+    vnComposing = false;
+    vnComposingJustEnded = true;
+    setTimeout(()=>{ vnComposingJustEnded = false; }, 80);
+  });
   $("chatInput").addEventListener("keydown", (e)=>{
-    if(e.key === "Enter"){ e.preventDefault(); sendChatMessage(); }
+    if(e.key !== "Enter" || e.repeat) return;
+    if(vnComposing || vnComposingJustEnded || e.isComposing || e.keyCode === 229) return;
+    e.preventDefault();
+    sendChatMessage();
   });
 
   $("btnEnd").addEventListener("click", ()=>{
@@ -1180,10 +1422,100 @@
       if(state.call) state.call.close();
       if(state.dataConn) state.dataConn.close();
       if(state.peer) state.peer.destroy();
+      if(filterLoopId) cancelAnimationFrame(filterLoopId);
+      if(state.previewStream) state.previewStream.getTracks().forEach(t=>t.stop());
       if(state.localStream) state.localStream.getTracks().forEach(t=>t.stop());
       location.reload();
     }
   });
+
+  /* ---------- beauty filter panel wiring ---------- */
+  function updateFilterUI(){
+    $("valBrightness").textContent = filterState.brightness;
+    $("valSmooth").textContent = filterState.smooth;
+    $("valSaturate").textContent = filterState.saturate;
+    $("valWarmth").textContent = filterState.warmth;
+    $("fBrightness").value = filterState.brightness;
+    $("fSmooth").value = filterState.smooth;
+    $("fSaturate").value = filterState.saturate;
+    $("fWarmth").value = filterState.warmth;
+  }
+  function markPresetActive(name){
+    document.querySelectorAll(".filter-preset-btn").forEach(b=> b.classList.toggle("active", b.dataset.preset === name));
+  }
+  function applyPreset(name){
+    if(name === "natural"){ Object.assign(filterState, {brightness:0, smooth:0, saturate:0, warmth:0}); }
+    else if(name === "bright"){ Object.assign(filterState, {brightness:12, smooth:20, saturate:14, warmth:4}); }
+    else if(name === "soft"){ Object.assign(filterState, {brightness:6, smooth:55, saturate:2, warmth:8}); }
+    updateFilterUI();
+    markPresetActive(name);
+  }
+  ["fBrightness","fSmooth","fSaturate","fWarmth"].forEach(id=>{
+    $(id).addEventListener("input", (e)=>{
+      const key = {fBrightness:"brightness", fSmooth:"smooth", fSaturate:"saturate", fWarmth:"warmth"}[id];
+      filterState[key] = parseInt(e.target.value, 10);
+      $({fBrightness:"valBrightness", fSmooth:"valSmooth", fSaturate:"valSaturate", fWarmth:"valWarmth"}[id]).textContent = filterState[key];
+      markPresetActive(""); // manual tweak → no preset highlighted
+      $("btnToggleFilter").classList.toggle("filter-on",
+        filterState.brightness!==0 || filterState.smooth!==0 || filterState.saturate!==0 || filterState.warmth!==0);
+    });
+  });
+  document.querySelectorAll(".filter-preset-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      applyPreset(btn.dataset.preset);
+      $("btnToggleFilter").classList.toggle("filter-on", btn.dataset.preset !== "natural");
+    });
+  });
+  $("btnToggleFilter").addEventListener("click", ()=>{
+    $("filterPanel").classList.toggle("hidden");
+  });
+  $("btnCloseFilter").addEventListener("click", ()=> $("filterPanel").classList.add("hidden"));
+
+  /* ---------- self-pip: hide / show, drag to reposition, swap main ⇄ preview ---------- */
+  function setPipVisible(visible){
+    state.pipVisible = visible;
+    $("selfPip").classList.toggle("pip-hidden", !visible);
+    $("btnShowPip").classList.toggle("hidden", visible);
+  }
+  $("btnHidePip").addEventListener("click", (e)=>{ e.stopPropagation(); setPipVisible(false); });
+  $("btnShowPip").addEventListener("click", ()=> setPipVisible(true));
+  $("btnSwapVideo").addEventListener("click", (e)=>{
+    e.stopPropagation();
+    state.mainIsLocal = !state.mainIsLocal;
+    refreshVideoLayout();
+  });
+
+  (function enablePipDrag(){
+    const pip = $("selfPip");
+    let dragging=false, startX=0, startY=0, origLeft=0, origTop=0, moved=false;
+    pip.addEventListener("pointerdown", (e)=>{
+      if(e.target.closest(".pip-btn")) return;
+      const stage = document.querySelector(".stage");
+      const stageRect = stage.getBoundingClientRect();
+      const pipRect = pip.getBoundingClientRect();
+      origLeft = pipRect.left - stageRect.left;
+      origTop = pipRect.top - stageRect.top;
+      startX = e.clientX; startY = e.clientY; moved = false; dragging = true;
+      pip.style.right = "auto"; pip.style.bottom = "auto";
+      pip.style.left = origLeft + "px"; pip.style.top = origTop + "px";
+      pip.classList.add("dragging");
+      try{ pip.setPointerCapture(e.pointerId); }catch(err){}
+    });
+    pip.addEventListener("pointermove", (e)=>{
+      if(!dragging) return;
+      const dx = e.clientX - startX, dy = e.clientY - startY;
+      if(Math.abs(dx) > 3 || Math.abs(dy) > 3) moved = true;
+      const stage = document.querySelector(".stage");
+      const stageRect = stage.getBoundingClientRect();
+      let newLeft = origLeft + dx, newTop = origTop + dy;
+      newLeft = Math.max(6, Math.min(newLeft, stageRect.width - pip.offsetWidth - 6));
+      newTop = Math.max(6, Math.min(newTop, stageRect.height - pip.offsetHeight - 6));
+      pip.style.left = newLeft + "px"; pip.style.top = newTop + "px";
+    });
+    ["pointerup","pointercancel"].forEach(evt=>{
+      pip.addEventListener(evt, ()=>{ dragging = false; pip.classList.remove("dragging"); });
+    });
+  })();
 
   selectCreateRole("viewer");
 })();
